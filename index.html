@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Health Cost Converter</title>
+<title>Intervention Cost Converter</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Layout after the CCEMG–EPPI Cost Converter, in the IHEETS greens (iheets.co.in): a green title bar, numbered steps with
@@ -43,7 +43,10 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 var(
   padding-right: max(8px, env(safe-area-inset-right, 0px));
 }
 h1, h2, h3 { margin: 0; line-height: 1.25; }
-h1 { font-size: 1.75rem; font-weight: 700; font-style: italic; }
+h1 { font-size: 1.6rem; font-weight: 700; }
+h1 .js-ver { font-size: 0.95rem; font-weight: 600; opacity: 0.9; margin-left: 4px; }
+.brand { display: grid; gap: 2px; min-width: 0; }
+.brand p { font-size: 0.9rem; opacity: 0.92; }
 h2 { font-size: 1.2rem; font-weight: 400; color: var(--head); }
 h3 { font-size: 1rem; font-weight: 400; color: var(--head); }
 p { margin: 0; }
@@ -95,7 +98,7 @@ textarea { width: 100%; font-family: var(--mono); font-size: 0.85rem; resize: ve
 .hint, .avail { font-size: 0.85rem; color: var(--muted); }
 .info {
   width: 20px; height: 20px; border-radius: 50%; border: 1px solid #555; color: #333; background: #fff;
-  font: italic 700 12px/1 Georgia, serif; cursor: pointer; padding: 0; display: inline-grid; place-items: center; flex: none;
+  font: 700 12px/1 Georgia, serif; cursor: pointer; padding: 0; display: inline-grid; place-items: center; flex: none;
 }
 .info:hover, .info[aria-expanded="true"] { background: #333; color: #fff; }
 .info-text { font-size: 0.88rem; background: #fafafa; border: 1px solid var(--line); padding: 6px 9px; }
@@ -233,7 +236,10 @@ td input.ov.projected { color: var(--proj); border-style: dashed; border-color: 
 
 <div class="wrap">
   <header class="top">
-    <h1>Health Cost Converter</h1>
+    <div class="brand">
+      <h1>Intervention Cost Converter <span class="js-ver">v2.1.2</span></h1>
+      <p>Last update: <span class="js-upd"></span> · A tool for converting intervention costs across currencies and price years</p>
+    </div>
     <nav class="pages" aria-label="Pages">
       <a href="#calc" id="navCalc" aria-current="page">Calculator</a>
       <a href="#guide" id="navGuide">How to use</a>
@@ -244,7 +250,7 @@ td input.ov.projected { color: var(--proj); border-style: dashed; border-color: 
   <!-- ===================================================== CALCULATOR -->
   <div class="page" id="pageCalc">
     <div class="intro">
-      <p>This ‘Health Cost Converter’ (<span id="ver">v2.1.2</span>; data: <span id="stamp"></span>) is an open access web-based tool for adjusting estimates of cost expressed in one currency and price year to a specific target currency and price year. It applies the three methods of Turner et&nbsp;al. (2019), <i>Value in Health</i> 22(9):1026–1032; the default, Method 2 with PPP and the GDP deflator, is the computation of the CCEMG–EPPI Cost Converter.</p>
+      <p>This ‘Intervention Cost Converter’ (<span id="ver">v2.1.2</span>, last update: <span id="stamp"></span>) is an open access web-based tool for converting intervention costs across currencies and price years: it adjusts estimates of cost expressed in one currency and price year to a specific target currency and price year. It suits costs from any sector, including health care, public health, education, social welfare and international development, because it uses economy-wide price indices and purchasing power parities. It applies the three methods of Turner et&nbsp;al. (2019), Value in Health 22(9):1026–1032; the default, Method 2 with PPP and the GDP deflator, is the computation of the CCEMG–EPPI Cost Converter.</p>
       <p>Before using the tool, please read the ‘<a href="#info">Information for users</a>’, located beneath the tool on this web page, or the <a href="#guide">How to use</a> page.</p>
       <p>To use the tool, please enter and select your data using Steps 1–6, below. The further options keep their defaults unless you change them.</p>
     </div>
@@ -470,7 +476,7 @@ td input.ov.projected { color: var(--proj); border-style: dashed; border-color: 
 
     <section class="how" id="info">
       <h2>Information for users</h2>
-      <p>This web-based tool adjusts estimates of costs from their original currency and price year to a target currency and/or price year. A step-by-step guide with worked examples is on the <a href="#guide">How to use</a> page.</p>
+      <p>This web-based tool adjusts estimates of costs from their original currency and price year to a target currency and/or price year. The price indices (GDP deflator or consumer price index) and purchasing power parities for GDP cover the whole economy, so the tool can be used for intervention costs in any sector, not only health care. Where a sector-specific price index exists (for example a health-sector deflator), it can be typed under Values used. A step-by-step guide with worked examples is on the <a href="#guide">How to use</a> page.</p>
 
       <h3>Version</h3>
       <p>The current version of this tool is <span id="infoVer"></span>. Changes between versions are listed in the <a href="https://github.com/narassima/Health-Cost-Converter/blob/main/CHANGELOG.md">changelog</a>. Cite the version and data vintage shown at the top of the page.</p>
@@ -498,11 +504,11 @@ Method 3   V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
 
       <h3>References</h3>
       <ol class="refs">
-        <li>Turner HC, Lauer JA, Tran BX, Teerawattananon Y, Jit M. Adjusting for inflation and currency changes within health economic studies. <i>Value in Health</i>. 2019;22(9):1026–1032. <a href="https://doi.org/10.1016/j.jval.2019.03.021">doi:10.1016/j.jval.2019.03.021</a></li>
-        <li>Shemilt I, Thomas J, Morciano M. A web-based tool for adjusting costs to a specific target currency and price year. <i>Evidence &amp; Policy</i>. 2010;6(1):51–59. <a href="https://doi.org/10.1332/174426410X482999">doi:10.1332/174426410X482999</a></li>
-        <li>Kumaranayake L. The real and the nominal? Making inflationary adjustments to cost and other economic data. <i>Health Policy and Planning</i>. 2000;15:230–234.</li>
-        <li>Dunn A, Grosse SD, Zuvekas SH. Adjusting health expenditures for inflation: a review of measures for health services research in the United States. <i>Health Services Research</i>. 2018;53(1):175–196. <a href="https://doi.org/10.1111/1475-6773.12612">doi:10.1111/1475-6773.12612</a></li>
-        <li>WHO-CHOICE. <i>Making Choices in Health: WHO Guide to Cost-Effectiveness Analysis</i>. Geneva: World Health Organization; 2003.</li>
+        <li>Turner HC, Lauer JA, Tran BX, Teerawattananon Y, Jit M. Adjusting for inflation and currency changes within health economic studies. Value in Health. 2019;22(9):1026–1032. <a href="https://doi.org/10.1016/j.jval.2019.03.021">doi:10.1016/j.jval.2019.03.021</a></li>
+        <li>Shemilt I, Thomas J, Morciano M. A web-based tool for adjusting costs to a specific target currency and price year. Evidence &amp; Policy. 2010;6(1):51–59. <a href="https://doi.org/10.1332/174426410X482999">doi:10.1332/174426410X482999</a></li>
+        <li>Kumaranayake L. The real and the nominal? Making inflationary adjustments to cost and other economic data. Health Policy and Planning. 2000;15:230–234.</li>
+        <li>Dunn A, Grosse SD, Zuvekas SH. Adjusting health expenditures for inflation: a review of measures for health services research in the United States. Health Services Research. 2018;53(1):175–196. <a href="https://doi.org/10.1111/1475-6773.12612">doi:10.1111/1475-6773.12612</a></li>
+        <li>WHO-CHOICE. Making Choices in Health: WHO Guide to Cost-Effectiveness Analysis. Geneva: World Health Organization; 2003.</li>
         <li>Global Health Costing Consortium. Reference case for estimating the costs of global health services and interventions. <a href="https://ghcosting.org/pages/standards/reference_case">ghcosting.org</a></li>
         <li>CCEMG – EPPI-Centre Cost Converter, version 1.7 (January 2024). EPPI Centre, UCL. <a href="https://eppi.ioe.ac.uk/costconversion/">eppi.ioe.ac.uk/costconversion</a></li>
         <li>Council Regulation (EC) No 2866/98 on the conversion rates between the euro and the currencies of the Member States adopting the euro, as amended for each later member (irrevocable euro conversion rates); national redenomination laws as listed in <span class="mono">data/currency_history.csv</span>.</li>
@@ -523,7 +529,7 @@ Method 3   V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
     </nav>
     <div class="guide">
       <section>
-        <h2>How to use the Health Cost Converter</h2>
+        <h2>How to use the Intervention Cost Converter</h2>
         <p class="lead">From a single cost to a full list, with the worked examples of Turner et&nbsp;al. (2019). Every field in the calculator also has an <b class="mono">i</b> button that explains it in place.</p>
       </section>
 
@@ -603,7 +609,7 @@ Method 3   V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
         </section>
         <section id="g-own">
           <h3>9. Typing your own values</h3>
-          <p>Use <b>Values used</b> when a study reports its own deflator or exchange rate, when you want a health-sector price index, or to reproduce a published adjustment. Type over the number; the box turns violet and is marked <i>Your value</i>.</p>
+          <p>Use <b>Values used</b> when a study reports its own deflator or exchange rate, when you want a health-sector price index, or to reproduce a published adjustment. Type over the number; the box turns violet and is marked Your value.</p>
           <ul>
             <li>Take both years of an index from the same source; bases differ between sources.</li>
             <li>Clear a box to return to the data; <b>Use the data values again</b> clears them all.</li>
@@ -1029,7 +1035,7 @@ function checks(r) {
   Array.from(new Set([r.S].concat(r.set.out === "LCU" ? [r.T] : []))).forEach((iso) => {
     if (CTRY[iso] && CTRY[iso].note) add("note", esc(CTRY[iso].note).replace(/\.?$/, "."), "");
   });
-  if (r.f.some((x) => x.own)) add("note", "Some values were typed in by hand (marked <i>Your value</i>).", "uses your values");
+  if (r.f.some((x) => x.own)) add("note", "Some values were typed in by hand (marked “Your value”).", "uses your values");
   return out;
 }
 const rateUnit = (iso, basis) => curOf(iso) + " per " + (basis.indexOf("fx") === 0 ? "US$" : "I$");
@@ -1321,7 +1327,7 @@ function renderWording(r) {
       (Array.from(PROJ_LOG.keys()).some((k) => has(OV, "g:" + k)) ? " (or the stated rates)" : "") +
       (r.f.some((x) => x.proj && x.proj.how === "gap") ? ", and conversion rates in line with the inflation difference against the United States" : "") + ".";
   }
-  $("wording").textContent = pre + txt + "Price indices and conversion rates were taken from the " + sourcesText(r) + ", using the Health Cost Converter " + VERSION +
+  $("wording").textContent = pre + txt + "Price indices and conversion rates were taken from the " + sourcesText(r) + ", using the Intervention Cost Converter " + VERSION +
     " (" + SITE + ")." + own + proj +
     (v != null ? " For example, " + cost + " in " + r.y0 + " prices is " + money(v, r.tCur, r.projected) + " in " + r.y1 + " prices." : "");
 }
@@ -1490,7 +1496,7 @@ function listAsRows() {
   const rows = LIST.rows.map((r) => [r.label, r.amount, r.countryName || r.country, r.year, r.yUsed, r.curText || "local"]
     .concat(r.v.map(full), [r.v[+m - 1] == null ? "" : num(r.v[+m - 1], r.proj).replace(/,/g, ""), r.note || r.warn || ""]));
   const ov = Object.keys(OV).map((k) => k + "=" + OV[k]).join("; ");
-  const foot = [[], ["Health Cost Converter " + VERSION, SITE],
+  const foot = [[], ["Intervention Cost Converter " + VERSION, SITE],
     ["Data", "World Bank WDI last updated " + DATA.meta.wdi_updated + " (retrieved " + DATA.meta.wdi_retrieved + "); IMF WEO " + DATA.meta.weo + "; OECD PPPs"],
     ["Series", [CODE[set.measure], CODE[set.out === "INT" || set.basis === "ppp" ? set.pppSrc : set.fxSrc], CODE[set.fxSrc]].filter((x, i, a) => a.indexOf(x) === i).join("; ")],
     ["Settings", "output " + outCur + "; base year " + set.y1 + "; " + INDEX_LONG[set.measure] + "; exchange rates " + basisName(set.fxSrc) + "; tradable share " + Math.round(set.share * 100) + "%; " +
@@ -1624,8 +1630,10 @@ function init() {
   fillSelect($("y0"), years, 2006);
   fillSelect($("y1"), years, 2016);
   $("list").value = EXAMPLE_LIST;
-  $("stamp").textContent = "World Bank WDI " + DATA.meta.wdiText + " · IMF WEO " + DATA.meta.weo;
+  $("stamp").textContent = dText(DATA.meta.built);
   $("ver").textContent = "v" + VERSION;
+  document.querySelectorAll(".js-ver").forEach((el) => { el.textContent = "v" + VERSION; });
+  document.querySelectorAll(".js-upd").forEach((el) => { el.textContent = dText(DATA.meta.built); });
   $("infoVer").textContent = VERSION + " (data: World Bank WDI " + DATA.meta.wdiText + ", IMF WEO " + DATA.meta.weo + ")";
   const cnt = (s) => Object.keys(DATA.series[s]).length;
   const rng = (s) => { let a = 9999, b = 0; Object.keys(DATA.series[s]).forEach((iso) => { const x = span(s, iso); if (x) { a = Math.min(a, x[0]); b = Math.max(b, x[1]); } }); return a + "–" + b; };

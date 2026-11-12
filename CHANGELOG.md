@@ -10,6 +10,9 @@ All notable changes to the Health Cost Converter. Versions follow [semantic vers
   - A light leaf-green tint on the sensitivity rows and the final result, and leaf green (#6EA03F) on the slider.
   - Green links and headings.
 - In "Information for users", Methods 1, 2 and 3 each have their own short paragraph, followed by a separate "Which to choose" paragraph.
+- Renamed the tool from Health Cost Converter to **Intervention Cost Converter**, with the tagline "A tool for converting intervention costs across currencies and price years". The method uses economy-wide price indices and PPPs, so it suits costs from any sector. The name is updated on the page, in the methods wording, in the list export, the workbook, the README and CITATION.cff. The repository and web address are unchanged.
+- The header and introduction show the version and last-update date. The data sources are listed under "Information for users".
+- Italics have been removed from the page.
 - Results are unchanged.
 
 ## 2.1.1 — 2026-11-12

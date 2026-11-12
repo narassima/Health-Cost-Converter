@@ -1,6 +1,6 @@
-# Health Cost Converter
+# Intervention Cost Converter
 
-A browser calculator that restates a cost from one country, currency and price year in the currency and prices of another year, for health economic studies and systematic reviews. It applies the three adjustment methods of Turner et al. (2019), *Value in Health* 22(9):1026–1032, and shows every rate and index it uses.
+A tool for converting intervention costs across currencies and price years. It restates a cost from one country, currency and price year in the currency and prices of another year, for economic evaluations and systematic reviews in health care or any other sector (public health, education, social welfare, international development). The price indices and purchasing power parities cover the whole economy, so nothing in the method is specific to health. It applies the three adjustment methods of Turner et al. (2019), Value in Health 22(9):1026–1032, and shows every rate and index it uses.
 
 **Open the calculator:** https://narassima.github.io/Health-Cost-Converter/
 

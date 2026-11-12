@@ -345,7 +345,7 @@ def ranges(years):
 def report(D, notes, meta):
     names, S = D["names"], D["S"]
     L = [f"# Data quality report", "",
-         f"Health Cost Converter {VERSION}, built {TODAY.isoformat()} from World Development Indicators "
+         f"Intervention Cost Converter {VERSION}, built {TODAY.isoformat()} from World Development Indicators "
          f"(last updated {meta['wdi_updated']}), IMF World Economic Outlook ({meta['weo']}) and OECD PPPs.", "",
          "This file is written by `build/build.py` at every build. The build stops if a unit test fails.", "",
          "## Unit tests (all passed)", "",

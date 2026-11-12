@@ -141,7 +141,7 @@ def main():
 
     # ------------------------------------------------------------------ Calculator inputs (names used everywhere)
     ws = ws_calc
-    ws["A1"] = f"Health Cost Converter {B.VERSION}: workings"
+    ws["A1"] = f"Intervention Cost Converter {B.VERSION}: workings"
     ws["A1"].font = TITLE
     ws["A2"] = ("Yellow cells are inputs. Every other number is a formula: select a cell and use Formulas > Trace Precedents "
                 "to follow it back to the data sheets. Method: Turner et al. (2019), Value in Health 22(9):1026-1032.")
@@ -573,8 +573,8 @@ def main():
     # ------------------------------------------------------------------ README
     ws = ws_readme
     lines = [
-        (f"Health Cost Converter {B.VERSION}: workings", TITLE),
-        ("This workbook repeats every calculation of the Health Cost Converter (https://narassima.github.io/Health-Cost-Converter/) as "
+        (f"Intervention Cost Converter {B.VERSION}: workings", TITLE),
+        ("This workbook repeats every calculation of the Intervention Cost Converter (https://narassima.github.io/Health-Cost-Converter/) as "
          "Excel formulas, so a reader can check any result. Methods follow Turner et al. (2019), Value in Health 22(9):1026-1032.", None),
         (f"Data vintage: World Bank WDI last updated {wdi_upd} (retrieved {wmeta['retrieved']}); IMF {weo}; OECD PPPs. Built {B.TODAY.isoformat()}.", None),
         ("", None),

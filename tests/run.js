@@ -1,4 +1,4 @@
-// Tests for the Health Cost Converter. Run: node tests/run.js [path/to/Cost_Converter.html]
+// Tests for the Intervention Cost Converter. Run: node tests/run.js [path/to/Cost_Converter.html]
 // Loads the calculator's own script from the built page and checks it against the paper, the CCEMG-EPPI tool,
 // currency units, number parsing and the cases in the critical appraisal.
 "use strict";
