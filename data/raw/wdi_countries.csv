@@ -1,0 +1,297 @@
+iso3,name,aggregate
+ABW,Aruba,No
+AFE,Africa Eastern and Southern,Yes
+AFG,Afghanistan,No
+AFR,Africa,Yes
+AFW,Africa Western and Central,Yes
+AGO,Angola,No
+ALB,Albania,No
+AND,Andorra,No
+ARB,Arab World,Yes
+ARE,United Arab Emirates,No
+ARG,Argentina,No
+ARM,Armenia,No
+ASM,American Samoa,No
+ATG,Antigua and Barbuda,No
+AUS,Australia,No
+AUT,Austria,No
+AZE,Azerbaijan,No
+BDI,Burundi,No
+BEA,East Asia & Pacific (IBRD-only countries),Yes
+BEC,Europe & Central Asia (IBRD-only countries),Yes
+BEL,Belgium,No
+BEN,Benin,No
+BFA,Burkina Faso,No
+BGD,Bangladesh,No
+BGR,Bulgaria,No
+BHI,IBRD countries classified as high income,Yes
+BHR,Bahrain,No
+BHS,"Bahamas, The",No
+BIH,Bosnia and Herzegovina,No
+BLA,Latin America & the Caribbean (IBRD-only countries),Yes
+BLR,Belarus,No
+BLZ,Belize,No
+BMN,"Middle East, North Africa, Afghanistan & Pakistan (IBRD only)",Yes
+BMU,Bermuda,No
+BOL,Bolivia,No
+BRA,Brazil,No
+BRB,Barbados,No
+BRN,Brunei Darussalam,No
+BSS,Sub-Saharan Africa (IBRD-only countries),Yes
+BTN,Bhutan,No
+BWA,Botswana,No
+CAA,Sub-Saharan Africa (IFC classification),Yes
+CAF,Central African Republic,No
+CAN,Canada,No
+CEA,East Asia and the Pacific (IFC classification),Yes
+CEB,Central Europe and the Baltics,Yes
+CEU,Europe and Central Asia (IFC classification),Yes
+CHE,Switzerland,No
+CHI,Channel Islands,No
+CHL,Chile,No
+CHN,China,No
+CIV,Cote d'Ivoire,No
+CLA,Latin America and the Caribbean (IFC classification),Yes
+CME,Middle East and North Africa (IFC classification),Yes
+CMR,Cameroon,No
+COD,"Congo, Dem. Rep.",No
+COG,"Congo, Rep.",No
+COL,Colombia,No
+COM,Comoros,No
+CPV,Cabo Verde,No
+CRI,Costa Rica,No
+CSA,South Asia (IFC classification),Yes
+CSS,Caribbean small states,Yes
+CUB,Cuba,No
+CUW,Curacao,No
+CYM,Cayman Islands,No
+CYP,Cyprus,No
+CZE,Czechia,No
+DEA,East Asia & Pacific (IDA-eligible countries),Yes
+DEC,Europe & Central Asia (IDA-eligible countries),Yes
+DEU,Germany,No
+DJI,Djibouti,No
+DLA,Latin America & the Caribbean (IDA-eligible countries),Yes
+DMA,Dominica,No
+DMN,"Middle East, North Africa, Afghanistan & Pakistan (IDA total)",Yes
+DNK,Denmark,No
+DNS,IDA countries in Sub-Saharan Africa not classified as fragile situations,Yes
+DOM,Dominican Republic,No
+DSA,South Asia (IDA-eligible countries),Yes
+DSF,IDA countries in Sub-Saharan Africa classified as fragile situations,Yes
+DSS,Sub-Saharan Africa (IDA-eligible countries),Yes
+DZA,Algeria,No
+EAP,East Asia & Pacific (excluding high income),Yes
+EAR,Early-demographic dividend,Yes
+EAS,East Asia & Pacific,Yes
+ECA,Europe & Central Asia (excluding high income),Yes
+ECS,Europe & Central Asia,Yes
+ECU,Ecuador,No
+EGY,"Egypt, Arab Rep.",No
+EMU,Euro area,Yes
+ERI,Eritrea,No
+ESP,Spain,No
+EST,Estonia,No
+ETH,Ethiopia,No
+EUU,European Union,Yes
+FCV,"Fragility, Conflict, and Violence (FCV) situations",Yes
+FIN,Finland,No
+FJI,Fiji,No
+FRA,France,No
+FRO,Faroe Islands,No
+FSM,"Micronesia, Fed. Sts.",No
+FXS,"IDA countries classified as fragile situations, excluding Sub-Saharan Africa",Yes
+GAB,Gabon,No
+GBR,United Kingdom,No
+GEO,Georgia,No
+GHA,Ghana,No
+GIB,Gibraltar,No
+GIN,Guinea,No
+GMB,"Gambia, The",No
+GNB,Guinea-Bissau,No
+GNQ,Equatorial Guinea,No
+GRC,Greece,No
+GRD,Grenada,No
+GRL,Greenland,No
+GTM,Guatemala,No
+GUM,Guam,No
+GUY,Guyana,No
+HIC,High income,Yes
+HKG,"Hong Kong SAR, China",No
+HND,Honduras,No
+HPC,Heavily indebted poor countries (HIPC),Yes
+HRV,Croatia,No
+HTI,Haiti,No
+HUN,Hungary,No
+IBB,"IBRD, including blend",Yes
+IBD,IBRD only,Yes
+IBT,IDA & IBRD total,Yes
+IDA,IDA total,Yes
+IDB,IDA blend,Yes
+IDN,Indonesia,No
+IDX,IDA only,Yes
+IMN,Isle of Man,No
+IND,India,No
+INX,Not classified,Yes
+IRL,Ireland,No
+IRN,"Iran, Islamic Rep.",No
+IRQ,Iraq,No
+ISL,Iceland,No
+ISR,Israel,No
+ITA,Italy,No
+JAM,Jamaica,No
+JOR,Jordan,No
+JPN,Japan,No
+KAZ,Kazakhstan,No
+KEN,Kenya,No
+KGZ,Kyrgyz Republic,No
+KHM,Cambodia,No
+KIR,Kiribati,No
+KNA,St. Kitts and Nevis,No
+KOR,"Korea, Rep.",No
+KWT,Kuwait,No
+LAC,Latin America & Caribbean (excluding high income),Yes
+LAO,Lao PDR,No
+LBN,Lebanon,No
+LBR,Liberia,No
+LBY,Libya,No
+LCA,St. Lucia,No
+LCN,Latin America & Caribbean,Yes
+LDC,Least developed countries: UN classification,Yes
+LIC,Low income,Yes
+LIE,Liechtenstein,No
+LKA,Sri Lanka,No
+LMC,Lower middle income,Yes
+LMY,Low & middle income,Yes
+LSO,Lesotho,No
+LTE,Late-demographic dividend,Yes
+LTU,Lithuania,No
+LUX,Luxembourg,No
+LVA,Latvia,No
+MAC,"Macao SAR, China",No
+MAF,St. Martin (French part),No
+MAR,Morocco,No
+MCO,Monaco,No
+MDA,Moldova,No
+MDE,Middle East (developing only),Yes
+MDG,Madagascar,No
+MDV,Maldives,No
+MEA,"Middle East, North Africa, Afghanistan & Pakistan",Yes
+MEX,Mexico,No
+MHL,Marshall Islands,No
+MIC,Middle income,Yes
+MKD,North Macedonia,No
+MLI,Mali,No
+MLT,Malta,No
+MMR,Myanmar,No
+MNA,"Middle East, North Africa, Afghanistan & Pakistan (excluding high income)",Yes
+MNE,Montenegro,No
+MNG,Mongolia,No
+MNP,Northern Mariana Islands,No
+MOZ,Mozambique,No
+MRT,Mauritania,No
+MUS,Mauritius,No
+MWI,Malawi,No
+MYS,Malaysia,No
+NAC,North America,Yes
+NAF,North Africa,Yes
+NAM,Namibia,No
+NCL,New Caledonia,No
+NER,Niger,No
+NGA,Nigeria,No
+NIC,Nicaragua,No
+NLD,Netherlands,No
+NOR,Norway,No
+NPL,Nepal,No
+NRS,Non-resource rich Sub-Saharan Africa countries,Yes
+NRU,Naoero,No
+NXS,"IDA countries not classified as fragile situations, excluding Sub-Saharan Africa",Yes
+NZL,New Zealand,No
+OED,OECD members,Yes
+OMN,Oman,No
+OSS,Other small states,Yes
+PAK,Pakistan,No
+PAN,Panama,No
+PER,Peru,No
+PHL,Philippines,No
+PLW,Palau,No
+PNG,Papua New Guinea,No
+POL,Poland,No
+PRE,Pre-demographic dividend,Yes
+PRI,Puerto Rico (US),No
+PRK,"Korea, Dem. People's Rep.",No
+PRT,Portugal,No
+PRY,Paraguay,No
+PSE,West Bank and Gaza,No
+PSS,Pacific island small states,Yes
+PST,Post-demographic dividend,Yes
+PYF,French Polynesia,No
+QAT,Qatar,No
+ROU,Romania,No
+RRS,Resource rich Sub-Saharan Africa countries,Yes
+RUS,Russian Federation,No
+RWA,Rwanda,No
+SAS,South Asia,Yes
+SAU,Saudi Arabia,No
+SDN,Sudan,No
+SEN,Senegal,No
+SGP,Singapore,No
+SLB,Solomon Islands,No
+SLE,Sierra Leone,No
+SLV,El Salvador,No
+SMR,San Marino,No
+SOM,"Somalia, Fed. Rep.",No
+SRB,Serbia,No
+SSA,Sub-Saharan Africa (excluding high income),Yes
+SSD,South Sudan,No
+SSF,Sub-Saharan Africa,Yes
+SST,Small states,Yes
+STP,Sao Tome and Principe,No
+SUR,Suriname,No
+SVK,Slovak Republic,No
+SVN,Slovenia,No
+SWE,Sweden,No
+SWZ,Eswatini,No
+SXM,Sint Maarten (Dutch part),No
+SXZ,Sub-Saharan Africa excluding South Africa,Yes
+SYC,Seychelles,No
+SYR,Syrian Arab Republic,No
+TCA,Turks and Caicos Islands,No
+TCD,Chad,No
+TEA,East Asia & Pacific (IDA & IBRD countries),Yes
+TEC,Europe & Central Asia (IDA & IBRD countries),Yes
+TGO,Togo,No
+THA,Thailand,No
+TJK,Tajikistan,No
+TKM,Turkmenistan,No
+TLA,Latin America & the Caribbean (IDA & IBRD countries),Yes
+TLS,Timor-Leste,No
+TMN,"Middle East, North Africa, Afghanistan & Pakistan (IDA & IBRD)",Yes
+TON,Tonga,No
+TSA,South Asia (IDA & IBRD),Yes
+TSS,Sub-Saharan Africa (IDA & IBRD countries),Yes
+TTO,Trinidad and Tobago,No
+TUN,Tunisia,No
+TUR,Turkiye,No
+TUV,Tuvalu,No
+TZA,Tanzania,No
+UGA,Uganda,No
+UKR,Ukraine,No
+UMC,Upper middle income,Yes
+URY,Uruguay,No
+USA,United States,No
+UZB,Uzbekistan,No
+VCT,St. Vincent and the Grenadines,No
+VEN,"Venezuela, RB",No
+VGB,British Virgin Islands,No
+VIR,Virgin Islands (U.S.),No
+VNM,Viet Nam,No
+VUT,Vanuatu,No
+WLD,World,Yes
+WSM,Samoa,No
+XKX,Kosovo,No
+XZN,Sub-Saharan Africa excluding South Africa and Nigeria,Yes
+YEM,"Yemen, Rep.",No
+ZAF,South Africa,No
+ZMB,Zambia,No
+ZWE,Zimbabwe,No

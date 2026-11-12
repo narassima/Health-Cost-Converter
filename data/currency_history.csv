@@ -1,0 +1,64 @@
+iso3,old,old_name,new,old_per_new,year,month,kind,note
+AUT,ATS,Austrian schilling,EUR,13.7603,1999,1,euro,
+BEL,BEF,Belgian franc,EUR,40.3399,1999,1,euro,
+DEU,DEM,Deutsche Mark,EUR,1.95583,1999,1,euro,
+ESP,ESP,Spanish peseta,EUR,166.386,1999,1,euro,
+FIN,FIM,Finnish markka,EUR,5.94573,1999,1,euro,
+FRA,FRF,French franc,EUR,6.55957,1999,1,euro,
+IRL,IEP,Irish pound,EUR,0.787564,1999,1,euro,
+ITA,ITL,Italian lira,EUR,1936.27,1999,1,euro,
+LUX,LUF,Luxembourg franc,EUR,40.3399,1999,1,euro,
+NLD,NLG,Dutch guilder,EUR,2.20371,1999,1,euro,
+PRT,PTE,Portuguese escudo,EUR,200.482,1999,1,euro,
+SMR,ITL,Italian lira,EUR,1936.27,1999,1,euro,San Marino used the Italian lira before the euro
+MCO,FRF,French franc,EUR,6.55957,1999,1,euro,Monaco used the French franc before the euro
+GRC,GRD,Greek drachma,EUR,340.75,2001,1,euro,
+SVN,SIT,Slovenian tolar,EUR,239.64,2007,1,euro,
+CYP,CYP,Cypriot pound,EUR,0.585274,2008,1,euro,
+MLT,MTL,Maltese lira,EUR,0.4293,2008,1,euro,
+SVK,SKK,Slovak koruna,EUR,30.126,2009,1,euro,
+EST,EEK,Estonian kroon,EUR,15.6466,2011,1,euro,
+LVA,LVL,Latvian lats,EUR,0.702804,2014,1,euro,
+LTU,LTL,Lithuanian litas,EUR,3.4528,2015,1,euro,
+HRV,HRD,Croatian dinar,HRK,1000,1994,5,redenom,
+HRV,HRK,Croatian kuna,EUR,7.5345,2023,1,euro,
+BGR,BGL,Bulgarian lev (old),BGN,1000,1999,7,redenom,
+BGR,BGN,Bulgarian lev,EUR,1.95583,2026,1,euro,World Bank data for Bulgaria are already in euros for all years (GDP and PPP); the official exchange rate is published in leva and is converted here
+SLE,SLL,old leone,SLE,1000,2022,7,redenom,
+GHA,GHC,old cedi,GHS,10000,2007,7,redenom,
+TUR,TRL,old lira,TRY,1000000,2005,1,redenom,
+ROU,ROL,old leu,RON,10000,2005,7,redenom,
+ZMB,ZMK,old kwacha,ZMW,1000,2013,1,redenom,
+MOZ,MZM,old metical,MZN,1000,2006,7,redenom,
+BLR,BYB,Belarusian ruble (1992),BYR,1000,2000,1,redenom,
+BLR,BYR,Belarusian ruble (2000),BYN,10000,2016,7,redenom,
+MRT,MRO,old ouguiya,MRU,10,2018,1,redenom,
+STP,STD,old dobra,STN,1000,2018,1,redenom,
+VEN,VEB,bolivar,VEF,1000,2008,1,redenom,
+VEN,VEF,bolivar fuerte,VES2018,100000,2018,8,redenom,
+VEN,VES2018,bolivar soberano before October 2021,VES,1000000,2021,10,redenom,World Bank data for Venezuela are in the bolivar of October 2021; official exchange rates end in 2017
+AZE,AZM,old manat,AZN,5000,2006,1,redenom,
+TKM,TMM,old manat,TMT,5000,2009,1,redenom,Official exchange rates for Turkmenistan end in 2001
+RUS,RUR,ruble (before 1998),RUB,1000,1998,1,redenom,
+POL,PLZ,old zloty,PLN,10000,1995,1,redenom,
+BRA,BRE,cruzeiro,BRR,1000,1993,8,redenom,
+BRA,BRR,cruzeiro real,BRL,2750,1994,7,redenom,
+MEX,MXP,old peso,MXN,1000,1993,1,redenom,
+SDN,SDD,Sudanese dinar,SDG,100,2007,7,redenom,
+AFG,AFA,old afghani,AFN,1000,2002,10,redenom,
+COD,ZRN,new zaire,CDF,100000,1998,7,redenom,
+MDG,MGF,Malagasy franc,MGA,5,2005,1,redenom,
+UKR,UAK,karbovanets,UAH,100000,1996,9,redenom,
+TJK,TJR,Tajik ruble,TJS,1000,2000,10,redenom,
+ARG,ARA,austral,ARS,10000,1992,1,redenom,
+PER,PEI,inti,PEN,1000000,1991,7,redenom,
+AGO,AOR,readjusted kwanza,AOA,1000000,1999,12,redenom,
+ISR,ILR,old shekel,ILS,1000,1985,9,redenom,
+ZWE,ZWL,Zimbabwe dollar (2019),ZWG,2498.7242,2024,4,redenom,"Zimbabwe changed currency many times (redenominations of the Zimbabwe dollar in 2006, 2008 and 2009, US dollars from 2009 to 2019, the RTGS/Zimbabwe dollar from 2019 and ZiG from 2024); World Bank values before 2009 are not reliable and official and alternative rates differ widely"
+ECU,ECS,sucre,USD,25000,2000,1,dollar,Ecuador adopted the US dollar in 2000; World Bank data are in US dollars for all years. Amounts in sucres are converted at each year's official rate
+SLV,SVC,colon,USD,8.75,2001,1,dollar,El Salvador adopted the US dollar in 2001; World Bank data are in US dollars for all years. Amounts in colones are converted at each year's official rate
+LBR,LRD,Liberian dollar,USD,,,,usd_accounts,Liberia's national accounts are in US dollars (both currencies circulate). Amounts in Liberian dollars are converted at each year's official rate
+PSE,ILS,Israeli new shekel,USD,,,,usd_accounts,West Bank and Gaza's national accounts are in US dollars and there is no official exchange rate. Amounts in shekels are converted at Israel's official rate for the year
+PAN,,,,,,,note,The balboa is fixed at 1 per US dollar and US notes circulate; PAB and USD amounts are the same
+BHS,,,,,,,note,The Bahamian dollar is fixed at 1 per US dollar
+BMU,,,,,,,note,The Bermudian dollar is fixed at 1 per US dollar

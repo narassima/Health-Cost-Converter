@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+build/data.json
+build/fonts/
+Cost_Converter.html
+site/
+data/Cost_Converter_inputs_*.xlsx
+~$*.xlsx

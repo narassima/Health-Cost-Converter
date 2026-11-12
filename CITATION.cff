@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: "If you use this calculator, please cite the version and data vintage you used."
+title: "Health Cost Converter"
+abstract: "A browser calculator that adjusts health care costs for inflation and currency, applying the three methods of Turner et al. (2019), with World Bank, OECD and IMF data."
+type: software
+authors:
+  - family-names: "Narassima"
+    affiliation: "Great Lakes Institute of Management"
+version: "2.0.0"
+date-released: "2026-11-12"
+license: MIT
+url: "https://narassima.github.io/Health-Cost-Converter/"
+repository-code: "https://github.com/narassima/Health-Cost-Converter"
+keywords:
+  - health economics
+  - cost adjustment
+  - inflation
+  - purchasing power parity
+  - systematic review
+references:
+  - type: article
+    authors:
+      - family-names: "Turner"
+        given-names: "Hugo C."
+      - family-names: "Lauer"
+        given-names: "Jeremy A."
+      - family-names: "Tran"
+        given-names: "Bach Xuan"
+      - family-names: "Teerawattananon"
+        given-names: "Yot"
+      - family-names: "Jit"
+        given-names: "Mark"
+    title: "Adjusting for inflation and currency changes within health economic studies"
+    journal: "Value in Health"
+    volume: 22
+    issue: 9
+    start: 1026
+    end: 1032
+    year: 2019
+    doi: "10.1016/j.jval.2019.03.021"

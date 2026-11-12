@@ -1,0 +1,1701 @@
+<title>Health Cost Converter</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*__FONTS__*/
+/* Layout: a compact two-column worksheet on white. Paired inputs on the left; on the right, three result tiles,
+   then each method's chain of steps read left to right like the figures in Turner et al.; one column below 900px.
+   Colour: white ground, banknote inks. Method 1 = steel blue (tradable, US prices), Method 2 = copper (local prices),
+   Method 3 = intaglio violet (the mix of both), which is also the page accent. */
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --field: #ffffff;
+  --tint: #f7f8fb;
+  --chip: #eef0f6;
+  --ink: #1a2330;
+  --muted: #5f6b7a;
+  --line: #e3e7ee;
+  --accent: #4b3aa3;
+  --m1: #24609f;
+  --m2: #a2581b;
+  --m3: #4b3aa3;
+  --proj: #0f6b62;
+  --warn-bg: #fff8e9;
+  --warn: #7a4a00;
+  --bad-bg: #fff1f1;
+  --bad: #9b1f26;
+  --display: "Spectral", Georgia, "Times New Roman", serif;
+  --body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151c; --surface: #151e28; --field: #121a23; --tint: #18222d; --chip: #212c38; --ink: #e4eaf0; --muted: #9babbb;
+    --line: #2a3643; --accent: #a99cf0; --m1: #80b3ec; --m2: #e5a06a; --m3: #a99cf0; --proj: #6fd1c4;
+    --warn-bg: #33270f; --warn: #f2c86e; --bad-bg: #3a1719; --bad: #f2959a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151c; --surface: #151e28; --field: #121a23; --tint: #18222d; --chip: #212c38; --ink: #e4eaf0; --muted: #9babbb;
+  --line: #2a3643; --accent: #a99cf0; --m1: #80b3ec; --m2: #e5a06a; --m3: #a99cf0; --proj: #6fd1c4;
+  --warn-bg: #33270f; --warn: #f2c86e; --bad-bg: #3a1719; --bad: #f2959a; color-scheme: dark;
+}
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+.wrap {
+  max-width: 1440px; margin: 0 auto;
+  padding-block: 12px 32px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 14px;
+}
+h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 1.45rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.08rem; }
+h3 { font-size: 1rem; }
+p { margin: 0; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Header: name, page tabs and data date on one line */
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.brand { display: grid; gap: 1px; flex: 1 1 360px; min-width: 0; }
+.brand p { color: var(--muted); font-size: 0.8rem; }
+.pages { display: flex; flex-wrap: wrap; gap: 4px 2px; }
+.pages a { padding: 5px 11px; text-decoration: none; color: var(--muted); font-weight: 500; border-radius: 5px; font-size: 0.88rem; white-space: nowrap; }
+.pages a:hover { background: var(--tint); }
+.pages a[aria-current="page"] { color: var(--accent); background: var(--chip); }
+.pages a.dl { color: var(--accent); border: 1px solid var(--line); }
+.pages a.dl::before { content: "↓ "; }
+.stamp { font-size: 0.75rem; color: var(--muted); }
+.page { display: grid; gap: 18px; min-width: 0; }
+
+.grid { display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Form */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 12px; }
+@media (min-width: 901px) {
+  .panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 10px); max-height: calc(100vh - 20px); overflow-y: auto; }
+}
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 4px; min-width: 0; }
+fieldset + fieldset { border-top: 1px solid var(--line); padding-top: 10px; }
+legend { font-family: var(--display); font-weight: 600; font-size: 0.98rem; padding: 0; margin-bottom: 2px; }
+label { font-size: 0.8rem; font-weight: 500; color: var(--muted); }
+.lab { display: flex; align-items: center; gap: 6px; margin-top: 3px; min-width: 0; }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 10px; row-gap: 4px; }
+.pair.wide1 { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
+.c1 { grid-column: 1; } .c2 { grid-column: 2; } .span { grid-column: 1 / -1; }
+input[type="text"], select, textarea {
+  width: 100%; font: inherit; font-size: 0.86rem; color: var(--ink); background: var(--field);
+  border: 1px solid var(--line); border-radius: 5px; padding: 5px 8px; min-width: 0;
+}
+input[type="text"]:hover, select:hover, textarea:hover { border-color: var(--muted); }
+textarea { font-family: var(--mono); font-size: 0.8rem; line-height: 1.5; resize: vertical; white-space: pre; overflow-x: auto; }
+#cost { font-family: var(--mono); }
+.share-row { display: grid; grid-template-columns: auto minmax(60px, 1fr) 3.2em; align-items: center; gap: 8px; margin-top: 3px; }
+.share-row output { font-family: var(--mono); font-size: 0.82rem; text-align: right; }
+input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; }
+.check { display: flex; gap: 7px; align-items: flex-start; color: var(--ink); font-weight: 400; font-size: 0.8rem; }
+.check input { margin-top: 2px; accent-color: var(--accent); }
+.hint, .avail { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+.sublegend { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 6px; }
+.info {
+  width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); background: transparent;
+  font: italic 600 13px/1 var(--display); cursor: pointer; padding: 0; display: inline-grid; place-items: center; flex: none;
+}
+.info:hover { background: var(--chip); }
+.info[aria-expanded="true"] { background: var(--accent); color: var(--surface); }
+.info-text { font-size: 0.82rem; background: var(--tint); border: 1px solid var(--line); border-radius: 5px; padding: 7px 9px; color: var(--ink); line-height: 1.45; }
+.info-text p + p { margin-top: 4px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--tint); border: 1px solid var(--line); border-radius: 6px; padding: 2px; gap: 2px; }
+.seg button { font: inherit; font-size: 0.82rem; font-weight: 500; border: 0; background: transparent; color: var(--muted); padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+.seg button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(20 30 50 / 0.12); }
+.btn { font: inherit; font-size: 0.8rem; font-weight: 500; cursor: pointer; border-radius: 5px; padding: 5px 10px;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--surface); text-decoration: none; display: inline-block; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:hover { filter: brightness(1.08); }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Results */
+.out { display: grid; gap: 16px; min-width: 0; container-type: inline-size; }
+.alerts { display: grid; gap: 6px; }
+.alerts:empty { display: none; }
+.alert { border-radius: 6px; padding: 6px 10px; font-size: 0.8rem; background: var(--warn-bg); color: var(--warn); }
+.alert.bad { background: var(--bad-bg); color: var(--bad); }
+.alert.note { background: var(--tint); color: var(--ink); border: 1px solid var(--line); }
+.mk { width: 10px; height: 10px; border-radius: 2px; background: var(--mc); flex: none; display: inline-block; }
+.m1 { --mc: var(--m1); } .m2 { --mc: var(--m2); } .m3 { --mc: var(--m3); }
+.m1 .mk, .mk.m1 { border-radius: 50%; }
+.m3 .mk, .mk.m3 { transform: rotate(45deg) scale(0.85); border-radius: 1px; }
+.m2 .t-bar span { background-image: repeating-linear-gradient(135deg, transparent 0 3px, rgb(255 255 255 / 0.45) 3px 5px); }
+.m3 .t-bar span { background-image: radial-gradient(rgb(255 255 255 / 0.55) 1px, transparent 1.4px); background-size: 4px 4px; }
+.role { font-family: var(--body); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; margin-left: auto;
+  border-radius: 4px; padding: 1px 6px; border: 1px solid var(--line); color: var(--muted); }
+.role.main { color: var(--surface); background: var(--mc); border-color: var(--mc); }
+.tile.main { border-color: var(--mc); box-shadow: inset 0 0 0 1px var(--mc); }
+.which { font-size: 0.82rem; color: var(--muted); }
+.band { font-size: 0.75rem; color: var(--proj); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@container (max-width: 520px) { .tiles { grid-template-columns: minmax(0, 1fr); } }
+.tile { border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px 10px; display: grid; gap: 2px; min-width: 0; background: var(--surface); }
+.t-top { display: flex; align-items: center; gap: 7px; font-family: var(--display); font-weight: 600; font-size: 0.98rem; }
+.t-sub { font-size: 0.78rem; color: var(--muted); line-height: 1.35; }
+.big { font-family: var(--mono); font-size: 1.35rem; font-weight: 500; color: var(--mc); line-height: 1.25; overflow-wrap: anywhere; margin-top: 3px; }
+.t-bar { height: 5px; background: var(--chip); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.t-bar span { display: block; height: 100%; background: var(--mc); border-radius: 3px; }
+.big-sub { font-size: 0.75rem; color: var(--muted); }
+.spread { font-size: 0.8rem; color: var(--muted); margin-top: -6px; }
+.ver { font-size: 0.75rem; color: var(--accent); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; margin-left: 6px; font-family: var(--mono); vertical-align: middle; }
+.map { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 4px 10px; }
+.map label { display: grid; gap: 2px; }
+.read { font-size: 0.75rem; color: var(--muted); font-family: var(--mono); }
+.read.bad { color: var(--bad); font-family: var(--body); }
+.pj { color: var(--proj); font-weight: 600; }
+
+/* Step chains */
+.flows { border: 1px solid var(--line); border-radius: 8px; padding: 2px 12px; }
+.flow { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 4px 10px; padding: 8px 0; align-items: start; }
+.flow + .flow { border-top: 1px solid var(--line); }
+@container (max-width: 560px) { .flow { grid-template-columns: minmax(0, 1fr); } }
+.fl-lab { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.82rem; padding-top: 4px; }
+.fl-body { display: grid; gap: 4px; min-width: 0; }
+.fl-tag { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.chain { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: stretch; gap: 4px 2px; }
+.chain li { display: grid; align-content: center; gap: 0; min-width: 0; }
+.node { border: 1px solid var(--line); border-radius: 5px; padding: 3px 8px; background: var(--tint); }
+.node b { font-family: var(--mono); font-weight: 500; font-size: 0.8rem; white-space: nowrap; }
+.node small, .op small { font-size: 0.75rem; color: var(--muted); line-height: 1.25; }
+.op { padding: 0 8px 0 20px; position: relative; max-width: 15em; }
+.op::before { content: "→"; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); color: var(--mc); font-size: 0.9rem; }
+.op b { font-family: var(--mono); font-weight: 500; font-size: 0.78rem; color: var(--mc); white-space: nowrap; }
+.fl-sum { font-family: var(--mono); font-size: 0.8rem; }
+.fl-sum b { color: var(--mc); font-weight: 500; }
+
+.sec { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.sec > * { min-width: 0; }
+.sec-head { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.sec-head .spacer { flex: 1; }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@container (max-width: 760px) { .duo { grid-template-columns: minmax(0, 1fr); } }
+.tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.8rem; }
+th, td { text-align: left; padding: 4px 9px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; background: var(--tint); white-space: nowrap; }
+td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td input.ov { width: 9em; font-family: var(--mono); text-align: right; padding: 2px 6px; font-size: 0.78rem; }
+td input.ov.rate { width: 5.5em; }
+td input.ov.own { border-color: var(--accent); background: var(--chip); }
+td input.ov.projected { border-style: dashed; border-color: var(--proj); }
+.src { font-size: 0.75rem; color: var(--muted); }
+.src.own { color: var(--accent); font-weight: 600; }
+.src.proj { color: var(--proj); font-weight: 600; }
+.src.miss { color: var(--bad); font-weight: 600; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.wording { border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 0.82rem; line-height: 1.5; background: var(--tint); }
+.small-select { width: auto; }
+.flag { font-size: 0.75rem; color: var(--warn); }
+.flag.bad { color: var(--bad); }
+.flag.pj { color: var(--proj); }
+
+/* How it works and sources (bottom of the calculator) */
+.how { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 10px; }
+.how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px 26px; }
+@media (min-width: 1100px) { #how .how-grid { grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 640px) and (max-width: 1099px) { #how .how-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.how-grid > div { display: grid; gap: 5px; align-content: start; min-width: 0; }
+.how p, .how li { font-size: 0.8rem; }
+.how ul { margin: 0; padding-left: 1.1em; display: grid; gap: 3px; }
+.formula { font-family: var(--mono); font-size: 0.75rem; background: var(--tint); border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; white-space: pre-wrap; line-height: 1.65; }
+.sources ol { margin: 0; padding-left: 1.4em; display: grid; gap: 4px; font-size: 0.78rem; }
+.sources li { overflow-wrap: anywhere; }
+
+/* Guide: side menu and grouped sections */
+.guide-page { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 900px) { .guide-page { grid-template-columns: minmax(0, 1fr); } }
+.toc { display: grid; gap: 1px; font-size: 0.82rem; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 10px); }
+.toc a { text-decoration: none; color: var(--muted); padding: 3px 8px; border-radius: 4px; }
+.toc a:hover { background: var(--tint); color: var(--ink); }
+.toc b { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 0 8px 4px; }
+@media (max-width: 900px) { .toc { position: static; display: flex; flex-wrap: wrap; } .toc b { width: 100%; } }
+.guide { display: grid; gap: 18px; min-width: 0; }
+.g-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px 26px; align-items: start; }
+.guide section { display: grid; gap: 6px; min-width: 0; scroll-margin-top: 12px; align-content: start; }
+.guide section > * { min-width: 0; }
+.guide p, .guide li { font-size: 0.86rem; max-width: 82ch; }
+.guide ul, .guide ol { margin: 0; padding-left: 1.2em; display: grid; gap: 3px; }
+.guide .lead { color: var(--muted); }
+.card-sec { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+#g-method td:first-child { white-space: nowrap; }
+.expect { font-family: var(--mono); font-size: 0.78rem; background: var(--tint); border-radius: 4px; padding: 3px 7px; }
+@media (prefers-reduced-motion: no-preference) { .t-bar span { transition: width 0.25s ease; } }
+@media (max-width: 640px) {
+  #vals thead { display: none; }
+  #vals tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; padding: 6px 9px; border-bottom: 1px solid var(--line); }
+  #vals td { border: 0; padding: 0; white-space: normal; }
+  #vals td:first-child { grid-column: 1 / -1; font-weight: 500; }
+  #vals td.n { text-align: left; }
+}
+@media print {
+  :root, :root[data-theme="dark"] { --bg: #fff; --surface: #fff; --field: #fff; --tint: #f6f6f6; --chip: #eee; --ink: #000; --muted: #444;
+    --line: #ccc; --accent: #3b2d8a; --m1: #1d4f84; --m2: #7f4513; --m3: #3b2d8a; --proj: #0b5149; color-scheme: light; }
+  body { font-size: 11pt; }
+  .pages, .actions, .info, .info-text, .seg, button, #resetBtn, #copyMsg, .toc, .how-grid .xl-link { display: none !important; }
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .panel { position: static; max-height: none; overflow: visible; break-inside: avoid; }
+  .tablebox { overflow: visible; }
+  .tile, .flows, .wording, table { break-inside: avoid; }
+  input[type="text"], select, textarea { border: 0; padding: 0; appearance: none; -webkit-appearance: none; }
+  a { color: inherit; }
+}
+</style>
+<!--BODY-->
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Health Cost Converter <span class="ver" id="ver">v__VERSION__</span></h1>
+      <p>Implements the three methods of Turner et&nbsp;al. (2019), <i>Value in Health</i> 22(9):1026–1032.</p>
+    </div>
+    <nav class="pages" aria-label="Pages">
+      <a href="#calc" id="navCalc" aria-current="page">Calculator</a>
+      <a href="#guide" id="navGuide">How to use</a>
+      <a href="Cost_Converter_Workings.xlsx" download class="xl-link dl">Excel workings</a>
+    </nav>
+    <span class="stamp mono" id="stamp"></span>
+  </header>
+
+  <!-- ===================================================== CALCULATOR -->
+  <div class="page" id="pageCalc">
+  <div class="grid">
+    <form id="form" class="panel" autocomplete="off">
+      <div class="seg" role="tablist" aria-label="What to convert">
+        <button type="button" role="tab" id="modeOne" aria-selected="true">One cost</button>
+        <button type="button" role="tab" id="modeList" aria-selected="false">A list of costs</button>
+      </div>
+      <div class="lab"><label for="dec">Decimal mark</label><button type="button" class="info" data-i="i-dec" aria-label="About Decimal mark">i</button></div>
+      <div class="info-text" id="i-dec" hidden><p><b>Automatic</b> reads 1,000,000 and 2,500.50 as written in English, and 12,5 or 1.234,56 as a decimal comma. A number such as 1,000 or 1.000 could be read either way; the calculator says how it read it. Choose <b>Comma</b> if the study writes 2.500,50, or <b>Point</b> to read every comma as a thousands separator. Currency signs (£, €, US$) and spaces are ignored.</p></div>
+      <select id="dec">
+        <option value="auto">Automatic</option>
+        <option value=".">Point: 1,234.56</option>
+        <option value=",">Comma: 1.234,56</option>
+      </select>
+
+      <fieldset id="oneFields">
+        <legend>The cost</legend>
+        <div class="pair">
+          <div class="lab c1"><label for="cost">Amount</label><button type="button" class="info" data-i="i-cost" aria-label="About Amount">i</button></div>
+          <div class="lab c2"><label for="cur">Reported in</label><button type="button" class="info" data-i="i-cur" aria-label="About Reported in">i</button></div>
+          <div class="info-text span" id="i-cost" hidden><p>The cost as the study reports it, in the currency chosen under <b>Reported in</b>. Separators are fine (1,000,000); see <b>Decimal mark</b> for 2.500,50. Unit costs and totals both work: the adjustment is a multiplication, so it scales with the amount.</p></div>
+          <div class="info-text span" id="i-cur" hidden><p><b>Local currency</b>: the money of the country where the cost was incurred. Most studies report this.</p><p><b>US$</b> or <b>I$</b>: the study already converted a local cost. The calculator first turns it back into local currency at the price-year rate, then adjusts it (Turner et&nbsp;al., Figure 4). Applying local inflation straight to a US$ figure would overstate it.</p></div>
+          <input type="text" id="cost" class="c1" inputmode="decimal" value="1,000,000">
+          <select id="cur" class="c2">
+            <option value="LCU">Local currency</option>
+            <option value="USD">US$ (study converted)</option>
+            <option value="INT">I$ (study converted)</option>
+          </select>
+        </div>
+        <div class="pair wide1">
+          <div class="lab c1"><label for="country">Country where incurred</label><button type="button" class="info" data-i="i-country" aria-label="About Country where incurred">i</button></div>
+          <div class="lab c2"><label for="y0">Price year</label><button type="button" class="info" data-i="i-y0" aria-label="About Price year">i</button></div>
+          <div class="info-text span" id="i-country" hidden><p>The setting where the resources were used and paid for. Its currency is the starting point and its inflation drives Method 2.</p><p>Borrowing a cost from another country's study? Choose that study's country here, and your own setting under <b>Output currency</b>.</p></div>
+          <div class="info-text span" id="i-y0" hidden><p>The year whose prices the cost is expressed in: the price year the study states, or else the year the costs were collected. It is usually not the publication year. For a fiscal year such as 2015/16, use the list mode, which can average the two calendar years. Years after the data are projected.</p></div>
+          <select id="country" class="c1"></select>
+          <select id="y0" class="c2"></select>
+        </div>
+        <div id="oldBox" hidden>
+          <div class="lab"><label for="old">Amount is in</label><button type="button" class="info" data-i="i-old" aria-label="About the currency unit">i</button></div>
+          <div class="info-text" id="i-old" hidden><p>All money values here are in the country's current currency unit for every year (for example euros for Germany in 1995, new leones for Sierra Leone in 2017). If the study reports an older unit (Deutsche Mark, old leones), choose it: the amount is first divided by the legal conversion rate. For dollarised economies (Ecuador, El Salvador) and economies whose accounts are kept in US$ (Liberia, West Bank and Gaza), the local currency is converted at each year's official exchange rate. The table of conversions is <span class="mono">data/currency_history.csv</span> in the repository.</p></div>
+          <select id="old"></select>
+        </div>
+        <p class="avail" id="avail"></p>
+      </fieldset>
+
+      <fieldset id="listFields" hidden>
+        <legend>The costs</legend>
+        <div class="lab"><label for="list">Paste rows from Excel: Study, Amount, Country, Price year, Currency</label><button type="button" class="info" data-i="i-list" aria-label="About the list">i</button></div>
+        <div class="info-text" id="i-list" hidden><p>Copy the cells from Excel and paste them here; the columns arrive separated by tabs (semicolons and commas also work). A first row with column names is recognised, so the columns can be in any order; check the matches under <b>Columns</b>.</p><p>Country can be a name (Viet Nam or Vietnam) or an ISO code (VNM, VN). Currency: blank or the local code (VND) for local currency; USD or I$ for amounts the study already converted; an old code such as DEM or SLL for amounts in a former currency. The settings under <b>Convert to</b> apply to every row.</p></div>
+        <textarea id="list" rows="8" spellcheck="false"></textarea>
+        <p class="sublegend">Columns</p>
+        <div class="map" id="listMap"></div>
+        <p class="read" id="mapNote"></p>
+        <div class="lab"><label for="fy">Fiscal years (2015/16)</label><button type="button" class="info" data-i="i-fy" aria-label="About fiscal years">i</button></div>
+        <div class="info-text" id="i-fy" hidden><p>How to read a price year written as 2015/16, 2015-16 or FY2016-style ranges. <b>Average</b> converts the cost at both calendar years and averages the results; <b>First year</b> or <b>Second year</b> use one of them. A single year (2015) is always read as that calendar year.</p></div>
+        <select id="fy">
+          <option value="avg">Average of the two years</option>
+          <option value="start">First year (2015 for 2015/16)</option>
+          <option value="end">Second year (2016 for 2015/16)</option>
+          <option value="cal">Not allowed: flag the row</option>
+        </select>
+      </fieldset>
+
+      <fieldset>
+        <legend>Convert to</legend>
+        <div class="pair">
+          <div class="lab c1"><label for="y1">Base year</label><button type="button" class="info" data-i="i-y1" aria-label="About Base year">i</button></div>
+          <div class="lab c2"><label for="out">Output currency</label><button type="button" class="info" data-i="i-out" aria-label="About Output currency">i</button></div>
+          <div class="info-text span" id="i-y1" hidden><p>The year whose prices you want the result in, usually your analysis year. It can be earlier than the price year: the calculator then deflates. You can choose up to 2037; years after the last World Bank figure (2024 or 2025 for most countries) use projected values, marked in green.</p></div>
+          <div class="info-text span" id="i-out" hidden><p><b>International $</b> converts with PPP factors, so I$1 buys in each country what US$1 buys in the United States. Better for comparing resource use across countries, and the usual choice in reviews.</p><p><b>US$</b> converts at market exchange rates: widely understood, but rates can swing.</p><p><b>Local currency of a country</b>: your study setting's money, or the same country to adjust for inflation only. Turner et&nbsp;al. suggest reporting local currency next to US$ or I$.</p></div>
+          <select id="y1" class="c1"></select>
+          <select id="out" class="c2">
+            <option value="INT">International $ (PPP)</option>
+            <option value="USD">US$ (market exchange rates)</option>
+            <option value="LCU">Local currency of a country</option>
+          </select>
+        </div>
+        <div id="lcuBox" class="pair" hidden>
+          <div class="lab c1"><label for="tcountry">Country</label><button type="button" class="info" data-i="i-tc" aria-label="About the output country">i</button></div>
+          <div class="lab c2"><label for="basis">Convert with</label><button type="button" class="info" data-i="i-basis" aria-label="About the conversion basis">i</button></div>
+          <div class="info-text span" id="i-tc" hidden><p>The country whose currency you want, usually your study setting. Choose the same country as above to adjust for inflation only.</p></div>
+          <div class="info-text span" id="i-basis" hidden><p><b>Market rates</b> reflect what money buys in trade; Turner et&nbsp;al. (Figure 3) use them to bring costs from another setting into the study's currency.</p><p><b>PPP</b> reflects what money buys locally. The CCEMG–EPPI Cost Converter uses PPP; choose it, with the GDP deflator and Method 2, to follow that tool.</p></div>
+          <select id="tcountry" class="c1"></select>
+          <select id="basis" class="c2">
+            <option value="fx">Market rates</option>
+            <option value="ppp">PPP</option>
+          </select>
+        </div>
+        <div class="pair">
+          <div class="lab c1"><label for="measure">Inflation measure</label><button type="button" class="info" data-i="i-measure" aria-label="About Inflation measure">i</button></div>
+          <div class="lab c2"><label for="wordM">Main method</label><button type="button" class="info" data-i="i-main" aria-label="About Main method">i</button></div>
+          <div class="info-text span" id="i-measure" hidden><p><b>GDP deflator, linked series</b> (default): the price change of everything produced in the economy, with the jumps caused by rebasing the national accounts removed. WHO-CHOICE (2003) recommends the GDP deflator, and the CCEMG–EPPI tool uses it.</p><p><b>GDP deflator, standard series</b>: the World Bank's headline series; jumps at rebasing years are flagged.</p><p><b>Consumer price index</b>: the price change of a household shopping basket. It may not track healthcare prices.</p><p class="which">Which index? Medical-care price indices can rise faster or slower than the economy-wide indices; where a national health-sector deflator exists, it can be typed under Values used (Dunn et&nbsp;al., 2018).</p></div>
+          <div class="info-text span" id="i-main" hidden><p>The method reported as the main result; the other two are shown as sensitivity analyses, and the methods wording follows this choice.</p><p><b>Method 2</b> (default) with PPP and the GDP deflator is the CCEMG–EPPI default for reviews and needs no tradable share. Choose <b>Method 1</b> when resources are mostly tradable or local inflation is above about 15–20% a year, and <b>Method 3</b> when you know the tradable share.</p></div>
+          <select id="measure" class="c1">
+            <option value="gdpd_l">GDP deflator, linked series</option>
+            <option value="gdpd">GDP deflator, standard series</option>
+            <option value="cpi">Consumer price index</option>
+          </select>
+          <select id="wordM" class="c2">
+            <option value="2" selected>Method 2</option><option value="1">Method 1</option><option value="3">Method 3</option>
+          </select>
+        </div>
+        <div id="fxBox">
+          <div class="lab"><label for="fxSrc">Exchange rates from</label><button type="button" class="info" data-i="i-fx" aria-label="About exchange rates">i</button></div>
+          <div class="info-text" id="i-fx" hidden><p><b>Official exchange rate</b> (PA.NUS.FCRF): the annual average rate set or reported by the national authority.</p><p><b>Alternative conversion factor</b> (PA.NUS.ATLS): the World Bank's own rate, which replaces the official rate in years with multiple or controlled exchange rates (for example Lebanon after 2019, Venezuela, Argentina before 2016). It also covers years after an official series stops. A warning appears where the two differ by more than 10%.</p></div>
+          <select id="fxSrc">
+            <option value="fx">Official exchange rate</option>
+            <option value="fx_alt">Alternative conversion factor (World Bank)</option>
+          </select>
+        </div>
+        <div id="pppBox">
+          <div class="lab"><label for="pppSrc">PPP values from</label><button type="button" class="info" data-i="i-ppp" aria-label="About PPP values">i</button></div>
+          <div class="info-text" id="i-ppp" hidden><p><b>World Bank</b>: PPP conversion factors from the International Comparison Program (2021 benchmark), about 200 economies from 1990. A new benchmark revises every year, so a result can change when the World Bank updates the series; the calculator notes when the conversion spans a benchmark year.</p><p><b>OECD</b>: PPPs for GDP for 65 mostly high-income countries, some from the 1950s. The two differ slightly for OECD members, as the IMF and OECD options do in the CCEMG–EPPI tool.</p></div>
+          <select id="pppSrc">
+            <option value="ppp">World Bank (ICP, about 200 economies)</option>
+            <option value="ppp_oecd">OECD (65 countries)</option>
+          </select>
+        </div>
+        <div class="share-row">
+          <span class="lab" style="margin:0"><label for="share">Tradable share (Method 3)</label><button type="button" class="info" data-i="i-share" aria-label="About Tradable share">i</button></span>
+          <input type="range" id="share" min="0" max="100" step="5" value="20">
+          <output id="shareOut" for="share">20%</output>
+        </div>
+        <div class="info-text" id="i-share" hidden><p>The part of the cost spent on <b>tradable</b> resources bought on world markets: imported drugs, equipment, laboratory supplies. The rest is <b>nontradable</b>: staff time, buildings, local services.</p><p>Method 3 adjusts the tradable part with Method 1 and the rest with Method 2. An ingredients-based costing usually shows which items were imported; Turner et&nbsp;al. suggest treating imported items as tradable.</p></div>
+
+        <div id="projBox" hidden>
+          <p class="sublegend">Years after the data</p>
+          <div class="pair">
+            <div class="lab c1"><label for="projYears">Inflation</label><button type="button" class="info" data-i="i-projy" aria-label="About projected inflation">i</button></div>
+            <div class="lab c2"><label for="projFx">Exchange rates</label><button type="button" class="info" data-i="i-projfx" aria-label="About projected exchange rates">i</button></div>
+            <div class="info-text span" id="i-projy" hidden><p><b>IMF forecasts</b> (default): after a country's last year of World Bank data, its price index follows the IMF World Economic Outlook inflation forecast (average consumer prices) year by year; after the last forecast year the last rate is held. Countries without a forecast use their 10-year average.</p><p><b>5-, 10- or 20-year average</b>: the index grows at the country's own average annual rate over its last 5, 10 or 20 years of data.</p><p>Projected results are rounded to 3 significant figures and shown with the range from the 5- and 20-year rules. A series that stopped more than 3 years before the latest data is not projected.</p></div>
+            <div class="info-text span" id="i-projfx" hidden><p><b>Follow inflation gap</b>: a currency loses value against the US$ at the gap between its projected inflation and US inflation (relative purchasing power parity). <b>Hold last rate</b>: the last observed rate is kept. PPP factors always follow the GDP-deflator gap, as the World Bank does between benchmark years.</p></div>
+            <select id="projYears" class="c1">
+              <option value="weo">IMF forecasts (WEO)</option>
+              <option value="10">10-year average</option>
+              <option value="5">5-year average</option>
+              <option value="20">20-year average</option>
+            </select>
+            <select id="projFx" class="c2">
+              <option value="gap">Follow inflation gap</option>
+              <option value="hold">Hold last rate</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="actions" id="exampleActions">
+        <button type="button" class="btn ghost" data-example="paper">Load the paper's worked example</button>
+        <a href="#guide" class="btn ghost">How to use</a>
+      </div>
+    </form>
+
+    <section id="oneOut" class="out" aria-live="polite">
+      <div class="alerts" id="alerts"></div>
+      <div class="tiles" id="tiles"></div>
+      <p class="which" id="which"></p>
+      <p class="spread" id="spread"></p>
+
+      <div class="sec">
+        <div class="sec-head"><h2>Step by step</h2><button type="button" class="info" data-i="i-steps" aria-label="About the steps">i</button></div>
+        <div class="info-text" id="i-steps" hidden><p>Each row follows one method from the reported amount to the result, like Figures 1 and 2 of Turner et&nbsp;al. Boxes are amounts; arrows are the rate or inflation factor applied. Values marked <span class="pj">projected</span> lie beyond the data.</p></div>
+        <div class="flows" id="flows"></div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-head"><h2>Values used</h2><button type="button" class="info" data-i="i-vals" aria-label="About Values used">i</button>
+          <span class="spacer"></span><span class="src" id="ovCount"></span><button type="button" class="btn ghost" id="resetBtn">Use the data values again</button></div>
+        <div class="info-text" id="i-vals" hidden><p>Every rate and index behind the result. Type over a value to use your own, for example a figure from the study itself or a health-sector price index; clear the box to go back to the data. Take both years of an index from the same source, because index bases differ between sources.</p></div>
+        <div class="tablebox"><table id="vals"></table></div>
+      </div>
+
+      <div class="sec" id="projSec" hidden>
+        <div class="sec-head"><h2>Projection assumptions</h2><button type="button" class="info" data-i="i-projsec" aria-label="About Projection assumptions">i</button></div>
+        <div class="info-text" id="i-projsec" hidden><p>The inflation used for each price index after its last year of data. Type an annual rate to replace it, for example an inflation target; clear the box to return to the setting under Years after the data.</p></div>
+        <div class="tablebox"><table id="projTable"></table></div>
+      </div>
+
+      <div class="duo">
+        <div class="sec">
+          <div class="sec-head"><h2>The same cost in other currencies</h2><button type="button" class="info" data-i="i-mat" aria-label="About other currencies">i</button></div>
+          <div class="info-text" id="i-mat" hidden><p>Turner et&nbsp;al. suggest reporting adjusted costs in US$ and/or international dollars as well as the local currency. This table gives all of them with the current settings.</p></div>
+          <div class="tablebox"><table id="matrix"></table></div>
+        </div>
+        <div class="sec">
+          <div class="sec-head"><h2>Methods-section wording</h2>
+            <span class="spacer"></span>
+            <button type="button" class="btn ghost" id="copyWord">Copy</button>
+            <button type="button" class="btn ghost" id="copyLink">Copy link</button><span class="src" id="copyMsg"></span></div>
+          <p class="wording" id="wording"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="listOut" class="out" hidden aria-live="polite">
+      <div class="alerts" id="listAlerts"></div>
+      <div class="sec">
+        <div class="sec-head"><h2 id="listTitle">Converted costs</h2><span class="spacer"></span>
+          <span class="src" id="listMsg"></span>
+          <button type="button" class="btn" id="copyList">Copy table for Excel</button>
+          <button type="button" class="btn ghost" id="dlList">Download CSV</button></div>
+        <p class="src" id="listLead"></p>
+        <div class="tablebox"><table id="listTable"></table></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="how" id="how">
+    <h2>How the calculator works</h2>
+    <div class="how-grid">
+      <div>
+        <h3>The three methods</h3>
+        <div class="formula">M1  V = C ÷ r<sub>S</sub>(t0) × r<sub>T</sub>(t0) × P<sub>T</sub>(t1)/P<sub>T</sub>(t0)
+M2  V = C × P<sub>S</sub>(t1)/P<sub>S</sub>(t0) ÷ r<sub>S</sub>(t1) × r<sub>T</sub>(t1)
+M3  V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
+        <p>C: cost in country S's currency at year-t0 prices. V: result in currency T at base-year t1 prices. r: local currency per US$ (market) or per I$ (PPP). P: GDP deflator or CPI. s: tradable share. For US$ and I$, r<sub>T</sub> = 1 and P<sub>T</sub> is the US index.</p>
+      </div>
+      <div>
+        <h3>Which method to use</h3>
+        <ul>
+          <li><b style="color:var(--m1)">Method 1</b> converts first, then inflates with US prices: suits tradable resources (imported drugs, equipment).</li>
+          <li><b style="color:var(--m2)">Method 2</b> inflates with local prices, then converts at the base-year rate: suits nontradable resources (staff, local services). With PPP and the GDP deflator it is the CCEMG–EPPI default and the main result here.</li>
+          <li><b style="color:var(--m3)">Method 3</b> treats each part with the method that suits it; Turner et&nbsp;al. recommend it when the cost can be split.</li>
+          <li>With local inflation above about 15–20% a year, Kumaranayake (2000) advises working in US$ (Method 1).</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Years after the data</h3>
+        <p>Price and base years run to 2037. After a country's last year of World Bank data, its price index follows the IMF World Economic Outlook inflation forecasts (or its own 5-, 10- or 20-year average), exchange rates follow the inflation gap against the US, and PPP factors follow the GDP-deflator gap. Projected values are marked in green, rounded to 3 significant figures, and can be replaced with your own rates.</p>
+      </div>
+      <div>
+        <h3>Data and currency units</h3>
+        <p>Indices, exchange rates and PPP factors come from the World Bank, the OECD and the IMF (listed below). Every money value is in the country's current currency unit for every year: exchange rates published in an older unit (pre-euro, Bulgaria, Venezuela, Zimbabwe) are re-expressed, and an automatic check confirms that exchange rates and PPP factors agree with GDP in local currency and US$. Deflator base years differ by country but only within-country ratios are used.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how sources" id="sources">
+    <h2>Sources</h2>
+    <div class="how-grid">
+      <div>
+        <h3>Data</h3>
+        <ol id="dataSources"></ol>
+      </div>
+      <div>
+        <p class="xl-link"><b>Excel workings.</b> Every calculation on this page is repeated as Excel formulas, with the data, so anyone can check a result: <a href="Cost_Converter_Workings.xlsx" download>Cost_Converter_Workings.xlsx</a>.</p>
+        <h3>Methods</h3>
+        <ol>
+          <li>Turner HC, Lauer JA, Tran BX, Teerawattananon Y, Jit M. Adjusting for inflation and currency changes within health economic studies. <i>Value in Health</i>. 2019;22(9):1026–1032. <a href="https://doi.org/10.1016/j.jval.2019.03.021">doi:10.1016/j.jval.2019.03.021</a></li>
+          <li>Shemilt I, Thomas J, Morciano M. A web-based tool for adjusting costs to a specific target currency and price year. <i>Evidence &amp; Policy</i>. 2010;6(1):51–59. <a href="https://doi.org/10.1332/174426410X482999">doi:10.1332/174426410X482999</a></li>
+          <li>Kumaranayake L. The real and the nominal? Making inflationary adjustments to cost and other economic data. <i>Health Policy and Planning</i>. 2000;15:230–234.</li>
+          <li>Dunn A, Grosse SD, Zuvekas SH. Adjusting health expenditures for inflation: a review of measures for health services research in the United States. <i>Health Services Research</i>. 2018;53(1):175–196. <a href="https://doi.org/10.1111/1475-6773.12612">doi:10.1111/1475-6773.12612</a></li>
+          <li>WHO-CHOICE. <i>Making Choices in Health: WHO Guide to Cost-Effectiveness Analysis</i>. Geneva: World Health Organization; 2003.</li>
+          <li>Global Health Costing Consortium. Reference case for estimating the costs of global health services and interventions. <a href="https://ghcosting.org/pages/standards/reference_case">ghcosting.org</a></li>
+          <li>CCEMG – EPPI-Centre Cost Converter, version 1.7 (January 2024). EPPI Centre, UCL. <a href="https://eppi.ioe.ac.uk/costconversion/">eppi.ioe.ac.uk/costconversion</a></li>
+          <li>Council Regulation (EC) No 2866/98 on the conversion rates between the euro and the currencies of the Member States adopting the euro, as amended for each later member (irrevocable euro conversion rates); national redenomination laws as listed in <span class="mono">data/currency_history.csv</span>.</li>
+        </ol>
+        <p class="src">Cite the version and data vintage shown at the top of the page. Code MIT licence; data CC BY 4.0 from the sources above. <a href="https://github.com/narassima/Health-Cost-Converter">Source code, tests and changelog</a>.</p>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <!-- ===================================================== GUIDE -->
+  <div class="page guide-page" id="pageGuide" hidden>
+    <nav class="toc" aria-label="Guide contents">
+      <b>Contents</b>
+      <a href="#g-what">1. What it does</a><a href="#g-quick">2. Quick start</a><a href="#g-currency">3. Output currency</a>
+      <a href="#g-method">4. Choosing a method</a><a href="#g-ex1">5. Example: the paper</a><a href="#g-ex2">6. Example: a US$ cost</a>
+      <a href="#g-ex3">7. Example: another country</a><a href="#g-list">8. A list of costs</a><a href="#g-own">9. Your own values</a>
+      <a href="#g-future">10. Years to 2037</a><a href="#g-warn">11. Warnings</a><a href="#g-report">12. Reporting</a>
+      <a href="#g-faq">13. Questions</a>
+    </nav>
+    <div class="guide">
+      <section>
+        <h2>How to use the Health Cost Converter</h2>
+        <p class="lead">From a single cost to a full list, with the worked examples of Turner et&nbsp;al. (2019). Every field in the calculator also has an <b class="mono">i</b> button that explains it in place.</p>
+      </section>
+
+      <div class="g-row">
+        <section id="g-what">
+          <h3>1. What the calculator does</h3>
+          <p>Costs from different years and countries cannot be compared directly: prices rise, and currencies change in value. The calculator restates a cost in the prices of one base year and in one currency, in the three ways set out by Turner et&nbsp;al. (2019), and shows every rate and index it uses so you can check and report the result.</p>
+          <p>The defaults suit a systematic review: international dollars, the linked GDP deflator, and Method 2 as the main result (the CCEMG–EPPI approach), with Methods 1 and 3 as sensitivity analyses.</p>
+        </section>
+        <section id="g-quick">
+          <h3>2. Quick start</h3>
+          <ol>
+            <li>Type the <b>Amount</b> and say what it is <b>Reported in</b> (usually local currency). If the study used a former currency (DEM, old leones), choose it under <b>Amount is in</b>.</li>
+            <li>Choose the <b>Country where incurred</b> and the <b>Price year</b>.</li>
+            <li>Under <b>Convert to</b>, choose the <b>Base year</b> and <b>Output currency</b>.</li>
+            <li>Keep the <b>linked GDP deflator</b> and <b>Method 2</b> unless you have a reason to change them.</li>
+            <li>Read the main result and the sensitivity results, check the warnings and <b>Values used</b>, then copy the <b>wording</b> or a <b>link</b> to the calculation.</li>
+          </ol>
+        </section>
+        <section id="g-currency">
+          <h3>3. Choosing the output currency</h3>
+          <ul>
+            <li><b>International $</b> (PPP): compares what money buys in each country and moves less; the usual choice for reviews.</li>
+            <li><b>US$</b>: familiar and used in international transactions, but market exchange rates can move sharply.</li>
+            <li><b>Local currency</b>: suits a decision-maker whose budget is in that currency. For a cost from a high-income country used in the same country, adjusting with local inflation in local currency is all that is needed. Report it next to US$ or I$; <b>The same cost in other currencies</b> gives all of them at once.</li>
+          </ul>
+        </section>
+      </div>
+
+      <section id="g-method">
+        <h3>4. Choosing a method</h3>
+        <div class="tablebox"><table>
+          <thead><tr><th>Method</th><th>What it does</th><th>Use it when</th><th>Watch out for</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mk m1"></span> Method 1</td><td>Converts at the price-year rate, then applies US (or output-country) inflation</td><td>Most resources are tradable, or local inflation is above about 15–20% a year</td><td>Understates local staff and service costs when local inflation runs above US inflation</td></tr>
+            <tr><td><span class="mk m2"></span> Method 2</td><td>Applies local inflation, then converts at the base-year rate</td><td>Most resources are nontradable: salaries, buildings, local services. The CCEMG–EPPI default with PPP</td><td>Overstates imported items when local inflation runs above US inflation</td></tr>
+            <tr><td><span class="mk m3"></span> Method 3</td><td>Tradable share through Method 1, the rest through Method 2</td><td>An ingredients-based costing shows which items were imported</td><td>Needs a split that published studies often do not report</td></tr>
+          </tbody>
+        </table></div>
+        <p>If you cannot split the cost, Turner et&nbsp;al. suggest Method 1 when tradable resources dominate and Method 2 when nontradable resources dominate. The gap between the methods grows with the gap between local and US inflation. Choose the main method under <b>Main method</b>; the other two are labelled sensitivity analyses.</p>
+      </section>
+
+      <div class="g-row">
+        <section id="g-ex1" class="card-sec">
+          <h3>5. Example: the paper's figures</h3>
+          <p>VND 1,000,000 incurred in Vietnam in 2006, wanted in US$ at 2016 prices, 20% tradable.</p>
+          <p><span class="expect">US$ 73.05 · 107.59 · 100.68</span></p>
+          <p>The button enters the paper's rates and indices under Values used. With today's World Bank data Method 2 gives about US$ 104.36: the linked GDP deflator rises × 2.29 from 2006 to 2016, against the paper's 2.36. The standard series gives × 2.91 (US$ 132.50) because it counts Vietnam's 2010 rebasing of the national accounts as inflation.</p>
+          <div class="actions"><button type="button" class="btn ghost" data-example="paper">Open in the calculator</button></div>
+        </section>
+        <section id="g-ex2" class="card-sec">
+          <h3>6. Example: a cost reported in US$</h3>
+          <p>A study reports US$ 100 for Vietnam in 2006; you want 2016 US$. Choose <b>Reported in: US$</b>. The calculator converts back to VND 1,599,425 at the 2006 rate, applies Vietnamese inflation for Method 2, and converts at the 2016 rate (Figure 4 of the paper).</p>
+          <p><span class="expect">US$ 116.84 · 172.09 · 161.04</span></p>
+          <div class="actions"><button type="button" class="btn ghost" data-example="usd">Open in the calculator</button></div>
+        </section>
+        <section id="g-ex3" class="card-sec">
+          <h3>7. Example: a cost from another country</h3>
+          <p>You cost a programme in India and borrow a UK unit cost of £1,200 at 2015 prices. Choose <b>United Kingdom</b>, <b>2015</b>, then <b>Local currency of a country</b>: <b>India</b>, base year <b>2024</b>. Turner et&nbsp;al. (Figure 3) convert at market rates; the CCEMG–EPPI tool uses PPP. Both are offered under <b>Convert with</b>.</p>
+          <div class="actions"><button type="button" class="btn ghost" data-example="borrow">Open in the calculator</button></div>
+        </section>
+      </div>
+
+      <div class="g-row">
+        <section id="g-list">
+          <h3>8. Converting a list of costs</h3>
+          <ol>
+            <li>Choose <b>A list of costs</b> at the top of the form.</li>
+            <li>In Excel, put one cost per row: Study, Amount, Country, Price year, Currency. Copy the cells with the header row and paste them in.</li>
+            <li>Check the matches under <b>Columns</b>; change any that are wrong.</li>
+            <li>Currency: blank or the local code (INR) for local currency; USD or I$ for converted amounts; an old code such as DEM or SLL for amounts in a former currency.</li>
+            <li>Price years such as 2015/16 are read as set under <b>Fiscal years</b> (average of the two years by default).</li>
+            <li>Set <b>Convert to</b> once; it applies to every row. The Notes column gives the warnings for each row.</li>
+            <li><b>Copy table for Excel</b> or <b>Download CSV</b>. The export keeps full precision, adds the rounded main result, and ends with the tool version, data vintage, series codes and settings.</li>
+          </ol>
+        </section>
+        <section id="g-own">
+          <h3>9. Typing your own values</h3>
+          <p>Use <b>Values used</b> when a study reports its own deflator or exchange rate, when you want a health-sector price index, or to reproduce a published adjustment. Type over the number; the box turns violet and is marked <i>Your value</i>.</p>
+          <ul>
+            <li>Take both years of an index from the same source; bases differ between sources.</li>
+            <li>Clear a box to return to the data; <b>Use the data values again</b> clears them all.</li>
+            <li>Values you type also apply to <b>A list of costs</b>, and rows that use them say so.</li>
+            <li><b>Copy link</b> saves the inputs, settings and your values in the page address.</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="g-row">
+        <section id="g-future">
+          <h3>10. Base years after the data (to 2037)</h3>
+          <p>World Bank data end in 2024 or 2025 for most countries. For later years the calculator projects:</p>
+          <ul>
+            <li><b>Price indices</b> with the IMF World Economic Outlook inflation forecasts (to 2031, then the last rate held), or at each country's average rate over its last 5, 10 or 20 years.</li>
+            <li><b>Exchange rates</b> following the inflation gap against the US, or held at the last rate.</li>
+            <li><b>PPP factors</b> following the GDP-deflator gap against the US.</li>
+          </ul>
+          <p>Projected values are green and results are rounded to 3 significant figures, with the range from the 5- and 20-year rules. <b>Projection assumptions</b> lists each country's rates; type a rate to replace them. A series that stopped more than 3 years before the latest data is not projected. Projections are assumptions, not data: say so in your report.</p>
+          <div class="actions"><button type="button" class="btn ghost" data-example="future">Open: INR 5,000 at 2022 prices to 2032</button></div>
+        </section>
+        <section id="g-warn">
+          <h3>11. Warnings and what to do</h3>
+          <ul>
+            <li><b>Amount is more than 10% of GDP</b>: the amount is probably in an old currency unit or in thousands. Choose the old unit under <b>Amount is in</b>.</li>
+            <li><b>Amount read in the current unit</b>: the price year is before a currency change; choose the old unit if the study used it.</li>
+            <li><b>Official rate differs from the alternative factor</b>: multiple or controlled exchange rates. Consider <b>Alternative conversion factor</b>.</li>
+            <li><b>Deflator rebasing break</b>: switch to the linked GDP deflator.</li>
+            <li><b>No data, or series ends early</b>: choose another year or source, or type a value.</li>
+            <li><b>High inflation</b> (above 15% a year): consider Method 1 unless most of the cost is nontradable.</li>
+            <li><b>Price level outside 5–400% of the US</b> or a <b>PPP-to-exchange-rate ratio change above three-fold</b>: check the values used.</li>
+            <li><b>Projected values</b>: the result depends on the projection assumptions; report the range.</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="g-row">
+        <section id="g-report">
+          <h3>12. Reporting</h3>
+          <p>Turner et&nbsp;al. ask authors to state the measure of inflation, the output currency, the adjustment method, and how costs from other settings were handled. Give the data sources and vintage, the tool version, and report the local currency too. <b>Methods-section wording</b> writes this for the main method, and <b>Copy link</b> lets readers reopen the calculation.</p>
+        </section>
+        <section id="g-faq">
+          <h3>13. Questions</h3>
+          <ul>
+            <li><b>Why does my result differ from the CCEMG–EPPI tool?</b> Same formula (Method 2, GDP deflator, PPP), different data: IMF October 2023 there, World Bank, OECD and IMF 2026 here.</li>
+            <li><b>Why does it differ from a published paper?</b> Agencies revise their series, and PPPs change with each ICP benchmark. Type the paper's values to reproduce it.</li>
+            <li><b>Can the base year be earlier than the price year?</b> Yes; the cost is deflated.</li>
+            <li><b>What is an international dollar?</b> A unit that buys in each country what US$1 buys in the United States.</li>
+            <li><b>Does the deflator's base year matter?</b> No; only within-country ratios are used.</li>
+            <li class="xl-link"><b>Can I check the calculations?</b> Yes. <a href="Cost_Converter_Workings.xlsx" download>Download the Excel workings</a>: the same inputs and data, with every step as a formula you can trace (Formulas › Trace Precedents).</li>
+            <li><b>How reliable is the data?</b> The <a href="https://github.com/narassima/Health-Cost-Converter/blob/main/DATA_QUALITY.md">data-quality report</a> lists every unit conversion, deflator break, rate gap and stale series found when the data were built.</li>
+            <li><b>How is the data updated?</b> Run <span class="mono">python build/fetch_data.py</span> then <span class="mono">python build/build.py</span>; the build stops if a unit check fails.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+(function () {
+"use strict";
+const VERSION = "__VERSION__";
+const SITE = "https://narassima.github.io/Health-Cost-Converter/";
+const REPO = "https://github.com/narassima/Health-Cost-Converter";
+const HAS_DOM = typeof document !== "undefined" && !!document.getElementById && !!document.getElementById("form");
+const $ = (id) => document.getElementById(id);
+const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+const CTRY = {};
+DATA.countries.forEach((c) => { CTRY[c.iso] = c; });
+const BYNAME = DATA.countries.slice().sort((a, b) => a.name.localeCompare(b.name));
+const INDEX_NAME = { gdpd_l: "GDP deflator", gdpd: "GDP deflator (standard series)", cpi: "CPI" };
+const INDEX_LONG = { gdpd_l: "GDP implicit price deflator (World Bank linked series)", gdpd: "GDP implicit price deflator (World Bank standard series)",
+                     cpi: "consumer price index" };
+const CODE = {
+  gdpd_l: "World Bank NY.GDP.DEFL.ZS.AD", gdpd: "World Bank NY.GDP.DEFL.ZS", cpi: "World Bank FP.CPI.TOTL",
+  fx: "World Bank PA.NUS.FCRF", fx_alt: "World Bank PA.NUS.ATLS", ppp: "World Bank PA.NUS.PPP (ICP 2021 basis)",
+  ppp_oecd: "OECD PPP for GDP", oldfx: "World Bank PA.NUS.FCRF",
+};
+const IDX = { gdpd_l: true, gdpd: true, cpi: true };
+const YEAR_END = 2037;
+const STALE = 3;                     // a series ending more than 3 years before the latest data is not projected
+const TREND_MAX = 0.15;              // projected inflation above 15% a year is flagged
+const OV = {};                       // values typed by the user: "series:iso:year" -> value, "g:series:iso" -> annual rate
+const PROJ = { how: "weo", fx: "gap" };   // how: "weo" (IMF forecasts) or the number of years of the trend rule
+const PROJ_LOG = new Map();          // "series:iso" -> how the index was projected in the last calculation
+
+let YMIN = 9999;
+["gdpd", "gdpd_l", "cpi", "fx"].forEach((k) => Object.values(DATA.series[k]).forEach((s) => { YMIN = Math.min(YMIN, s[0]); }));
+const LAST = {};                     // latest data year of each series over all countries
+Object.keys(DATA.series).forEach((k) => {
+  let b = 0;
+  Object.values(DATA.series[k]).forEach((s) => { b = Math.max(b, s[0] + s[1].length - 1); });
+  LAST[k] = b;
+});
+
+/* ---------- data access ---------- */
+function raw(series, iso, y) {
+  const s = DATA.series[series][iso];
+  if (!s) return null;
+  const i = y - s[0];
+  return i >= 0 && i < s[1].length ? s[1][i] : null;
+}
+const SPAN = {};
+function span(series, iso) {
+  const key = series + ":" + iso;
+  if (has(SPAN, key)) return SPAN[key];
+  const s = DATA.series[series][iso];
+  let a = null, b = null;
+  if (s) s[1].forEach((v, i) => { if (v != null) { if (a == null) a = s[0] + i; b = s[0] + i; } });
+  return (SPAN[key] = a == null ? null : [a, b]);
+}
+const isStale = (series, iso) => { const sp = span(series, iso); return !!sp && sp[1] < LAST[series] - STALE; };
+function trend(series, iso, years) {
+  const k = "g:" + series + ":" + iso;
+  const sp = span(series, iso);
+  if (has(OV, k)) return { g: OV[k], own: true, to: sp ? sp[1] : null };
+  if (!sp) return { g: null };
+  const n = years || (typeof PROJ.how === "number" ? PROJ.how : 10);
+  const L = sp[1];
+  let a = Math.max(sp[0], L - n);
+  while (a < L && !ok(raw(series, iso, a))) a++;
+  if (a >= L || !ok(raw(series, iso, L))) return { g: null };
+  return { g: Math.pow(raw(series, iso, L) / raw(series, iso, a), 1 / (L - a)) - 1, own: false, from: a, to: L, n: n };
+}
+function weoPath(iso, L, y) {
+  // IMF WEO inflation (% a year) for each year after L; the last WEO rate is held after the WEO horizon
+  const sw = span("weo", iso);
+  if (!sw || L + 1 < sw[0] || L >= sw[1]) return null;
+  let f = 1, top = -Infinity;
+  for (let t = L + 1; t <= y; t++) {
+    const w = raw("weo", iso, Math.min(t, sw[1]));
+    if (w == null) return null;
+    f *= 1 + w / 100;
+    top = Math.max(top, w / 100);
+  }
+  return { f: f, top: top, end: sw[1] };
+}
+function project(series, iso, y) {
+  const sp = span(series, iso);
+  if (!sp || y <= sp[1] || y > YEAR_END) return null;
+  const L = sp[1], base = raw(series, iso, L);
+  if (!ok(base)) return null;
+  if (isStale(series, iso)) return { v: null, stale: true, from: L };
+  if (IDX[series]) {
+    const key = series + ":" + iso;
+    if (!has(OV, "g:" + key) && PROJ.how === "weo") {
+      const w = weoPath(iso, L, y);
+      if (w) {
+        PROJ_LOG.set(key, { how: "weo", to: L, end: w.end, top: Math.max(w.top, (PROJ_LOG.get(key) || {}).top || -Infinity) });
+        return { v: base * w.f, from: L, how: "weo", g: Math.pow(w.f, 1 / (y - L)) - 1, held: y > w.end, end: w.end, top: w.top };
+      }
+    }
+    const t = trend(series, iso, PROJ.how === "weo" ? 10 : PROJ.how);
+    if (t.g == null) return null;
+    PROJ_LOG.set(key, { how: t.own ? "own" : "trend", g: t.g, from: t.from, to: t.to, n: t.n, fallback: PROJ.how === "weo" && !t.own });
+    return { v: base * Math.pow(1 + t.g, y - L), from: L, how: "trend", g: t.g, own: t.own, n: t.n, fallback: PROJ.how === "weo" && !t.own };
+  }
+  if (series === "oldfx" || ((series === "fx" || series === "fx_alt") && PROJ.fx === "hold")) return { v: base, from: L, how: "hold" };
+  const a = get("gdpd_l", iso, y).v, b = get("gdpd_l", iso, L).v, c = get("gdpd_l", "USA", y).v, d = get("gdpd_l", "USA", L).v;
+  if (!ok(a) || !ok(b) || !ok(c) || !ok(d)) return { v: base, from: L, how: "hold" };
+  return { v: base * (a / b) / (c / d), from: L, how: "gap" };
+}
+function get(series, iso, y) {
+  const k = series + ":" + iso + ":" + y;
+  if (has(OV, k)) return { v: OV[k], k: k, own: true };
+  const v = raw(series, iso, y);
+  if (v != null) return { v: v, k: k, own: false };
+  const p = project(series, iso, y);
+  if (p && p.stale) return { v: null, k: k, own: false, stale: true, last: p.from };
+  if (p) return { v: p.v, k: k, own: false, proj: p };
+  return { v: null, k: k, own: false };
+}
+const curOf = (iso) => (CTRY[iso] && CTRY[iso].cur) || "LCU";
+const nameOf = (iso) => (CTRY[iso] ? CTRY[iso].name : iso);
+const ok = (v) => v != null && isFinite(v) && v > 0;
+const oldOf = (iso, code) => ((CTRY[iso] && CTRY[iso].old) || []).find((o) => o.code === code) || null;
+const showCode = (code) => (code === "VES2018" ? "VES (2018–21)" : code);
+
+/* ---------- formatting ---------- */
+const fmt = (v, d) => v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const sig = (v, n) => v.toLocaleString("en-US", { maximumSignificantDigits: n });
+function num(v, proj) {
+  // projected results to 3 significant figures; otherwise cents, whole units from 100,000, 4 significant figures below 1
+  if (v == null || !isFinite(v)) return "—";
+  if (proj) return sig(v, 3);
+  const a = Math.abs(v);
+  return a >= 1e5 ? fmt(v, 0) : a >= 1 || a === 0 ? fmt(v, 2) : sig(v, 4);
+}
+function money(v, cur, proj) { return v == null || !isFinite(v) ? "—" : cur + " " + num(v, proj); }
+function rate(v) {
+  if (v == null || !isFinite(v)) return "—";
+  if (Math.abs(v) >= 1000) return fmt(v, 2);
+  return v.toLocaleString("en-US", { maximumSignificantDigits: 6 });
+}
+const fac = (v) => (v == null || !isFinite(v) ? "—" : fmt(v, 4));
+const pct = (g) => (g == null || !isFinite(g) ? "—" : fmt(g * 100, 2) + "%");
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const full = (v) => (v == null || !isFinite(v) ? "" : String(+v.toPrecision(12)));
+
+/* ---------- reading numbers: decimal point or decimal comma ---------- */
+// mark: "." (1,234.5), "," (1.234,5) or "auto". Returns {v, amb, err}; amb = could be read either way.
+function parseAmount(s, mark) {
+  let t = String(s == null ? "" : s).trim().replace(/[\s   ']/g, "");
+  t = t.replace(/^[^\d.,+-]+/, "").replace(/[^\d.,]+$/, "");          // currency signs and codes around the number
+  let neg = false;
+  if (/^[+-]/.test(t)) { neg = t[0] === "-"; t = t.slice(1); }
+  t = t.replace(/^[^\d.,]+/, "");
+  if (!t || !/^[\d.,]+([eE][+-]?\d+)?$/.test(t)) return { v: null, err: "not a number" };
+  const exp = (t.match(/[eE][+-]?\d+$/) || [""])[0];
+  let m = t.slice(0, t.length - exp.length);
+  const nc = (m.match(/,/g) || []).length, np = (m.match(/\./g) || []).length;
+  let dec = mark, amb = false;
+  if (mark !== "." && mark !== ",") {
+    if (nc && np) dec = m.lastIndexOf(",") > m.lastIndexOf(".") ? "," : ".";
+    else if (nc === 1) { dec = /,\d{3}$/.test(m) && !/^0,/.test(m) ? "." : ","; amb = dec === "." && /^\d{1,3},\d{3}$/.test(m); }
+    else if (nc > 1) dec = ".";
+    else if (np === 1) { dec = "."; amb = /^\d{1,3}\.\d{3}$/.test(m) && !/^0\./.test(m); }
+    else if (np > 1) dec = ",";
+    else dec = ".";
+  }
+  const thou = dec === "." ? "," : ".";
+  const parts = m.split(thou);
+  if (parts.length > 1 && !(parts[0].length >= 1 && parts[0].length <= 3 && parts.slice(1).every((p, i) => (i === parts.length - 2 ? /^\d{3}([.,]\d*)?$/ : /^\d{3}$/).test(p))))
+    return { v: null, err: "thousands separators in the wrong places" };
+  m = parts.join("");
+  if ((m.split(dec).length - 1) > 1) return { v: null, err: "more than one decimal mark" };
+  m = m.replace(dec, ".");
+  if (!/^\d*\.?\d+$|^\d+\.$/.test(m)) return { v: null, err: "not a number" };
+  const v = parseFloat(m + exp) * (neg ? -1 : 1);
+  return isFinite(v) ? { v: v, amb: amb } : { v: null, err: "not a number" };
+}
+const DEC = () => (HAS_DOM ? $("dec").value : "auto");
+const parseNum = (s) => parseAmount(s, DEC()).v;
+
+/* ---------- the calculation ---------- */
+// inp: {cost, cur: LCU|USD|INT, iso, y0, old: code of an older currency or ""}
+// set: {y1, out: USD|INT|LCU, tIso, basis: fx|ppp, measure: gdpd_l|gdpd|cpi, fxSrc: fx|fx_alt, pppSrc: ppp|ppp_oecd, share: 0..1}
+function compute(inp, set) {
+  const S = inp.iso, y0 = inp.y0, y1 = set.y1, P = set.measure;
+  const FX = set.fxSrc === "fx_alt" ? "fx_alt" : "fx";
+  let T, basis, I, tCur;
+  if (set.out === "USD") { T = "USA"; basis = FX; I = "USA"; tCur = "US$"; }
+  else if (set.out === "INT") { T = "USA"; basis = set.pppSrc; I = "USA"; tCur = "I$"; }
+  else { T = set.tIso; basis = set.basis === "ppp" ? set.pppSrc : FX; I = T; tCur = curOf(T); }
+  const same = set.out === "LCU" && T === S;
+  const f = [];
+  const need = (role, series, iso, y) => {
+    const g = get(series, iso, y);
+    f.push({ role: role, series: series, iso: iso, y: y, v: g.v, k: g.k, own: g.own, proj: g.proj || null, stale: !!g.stale, last: g.last });
+    return g.v;
+  };
+
+  let inRate = 1;
+  if (inp.cur === "USD") inRate = need("in", FX, S, y0);
+  else if (inp.cur === "INT") inRate = need("in", set.pppSrc, S, y0);
+  const old = inp.cur === "LCU" && inp.old ? oldOf(S, inp.old) : null;
+  const oldDiv = !old ? 1 : old.rate ? need("old", "oldfx", S, y0) : old.per;
+
+  let rS0 = 1, rS1 = 1, rT0 = 1, rT1 = 1;
+  if (!same) {
+    rS0 = need("rS0", basis, S, y0);
+    rS1 = y1 === y0 ? rS0 : need("rS1", basis, S, y1);
+    if (set.out === "LCU") {
+      rT0 = need("rT0", basis, T, y0);
+      rT1 = y1 === y0 ? rT0 : need("rT1", basis, T, y1);
+    }
+  }
+  const iS0 = need("iS0", P, S, y0), iS1 = y1 === y0 ? iS0 : need("iS1", P, S, y1);
+  let iT0 = iS0, iT1 = iS1;
+  if (I !== S) { iT0 = need("iT0", P, I, y0); iT1 = y1 === y0 ? iT0 : need("iT1", P, I, y1); }
+
+  const CS = inp.cost * inRate / oldDiv;
+  const okIn = ok(inRate) && ok(oldDiv);
+  const ok1 = okIn && ok(rS0) && ok(rT0) && ok(iT0) && ok(iT1);
+  const ok2 = okIn && ok(rS1) && ok(rT1) && ok(iS0) && ok(iS1);
+  const cross0 = rT0 / rS0, cross1 = rT1 / rS1, infT = iT1 / iT0, infS = iS1 / iS0;
+  const v1 = ok1 ? CS * cross0 * infT : null;
+  const v2 = ok2 ? CS * infS * cross1 : null;
+  const v3 = ok1 && ok2 ? set.share * v1 + (1 - set.share) * v2 : null;
+  const projected = f.some((x) => x.proj);
+  return { inp: inp, set: set, S: S, T: T, I: I, P: P, y0: y0, y1: y1, basis: basis, FX: FX, tCur: tCur, sCur: curOf(S), same: same, f: f,
+           inRate: inRate, old: old, oldDiv: oldDiv, CS: CS, rS0: rS0, rS1: rS1, rT0: rT0, rT1: rT1, iS0: iS0, iS1: iS1, iT0: iT0, iT1: iT1,
+           cross0: cross0, cross1: cross1, infT: infT, infS: infS, v1: v1, v2: v2, v3: v3, ok1: ok1, ok2: ok2, projected: projected };
+}
+// Results under the 5- and 20-year trend rules, for the low-high band of projected results.
+function band(inp, set, r) {
+  const keepHow = PROJ.how, keepLog = new Map(PROJ_LOG);
+  const alts = [5, 20].map((h) => { PROJ.how = h; return compute(inp, set); });
+  PROJ.how = keepHow; PROJ_LOG.clear(); keepLog.forEach((v, k) => PROJ_LOG.set(k, v));
+  return [1, 2, 3].map((m) => {
+    const xs = alts.concat([r]).map((x) => x["v" + m]).filter((v) => v != null);
+    return xs.length ? [Math.min.apply(null, xs), Math.max.apply(null, xs)] : null;
+  });
+}
+
+/* ---------- checks on the data ---------- */
+function seriesLabel(s) {
+  return { gdpd_l: "GDP deflator", gdpd: "GDP deflator", cpi: "consumer price index", fx: "official exchange rate",
+           fx_alt: "alternative conversion factor", ppp: "World Bank PPP factor", ppp_oecd: "OECD PPP factor", oldfx: "exchange rate of the old currency" }[s];
+}
+// Each check: {cls: "bad" | "" (warning) | "note", text (HTML), short (plain, for list rows; empty = not shown there)}
+function checks(r) {
+  const out = [];
+  const add = (cls, text, short) => out.push({ cls: cls, text: text, short: short || "" });
+  const seen = new Set();
+  r.f.filter((x) => !ok(x.v)).forEach((x) => {
+    const key = x.series + x.iso + x.y;
+    if (seen.has(key)) return;
+    seen.add(key);
+    if (x.stale) {
+      const alt = x.series === "fx" && span("fx_alt", x.iso) && !isStale("fx_alt", x.iso);
+      add("bad", "The " + seriesLabel(x.series) + " for " + esc(nameOf(x.iso)) + " ends in " + x.last + ", more than " + STALE +
+        " years before the latest data, so " + x.y + " is not projected. " + (alt ? "Choose <b>Alternative conversion factor</b> under Exchange rates from, or type" : "Type") +
+        " a value under Values used.", seriesLabel(x.series) + " for " + nameOf(x.iso) + " ends in " + x.last + " (not projected)");
+    } else {
+      add("bad", "No " + seriesLabel(x.series) + " for " + esc(nameOf(x.iso)) + " in " + x.y +
+        ". Type a value under Values used, or pick another year" + (x.series === "ppp_oecd" ? " or World Bank PPP values" : "") + ".",
+        "no " + seriesLabel(x.series) + " for " + nameOf(x.iso) + " " + x.y);
+    }
+  });
+  const c = CTRY[r.S] || {};
+  // C1, C3: amounts in an older currency
+  if (r.inp.cur === "LCU" && !r.inp.old && !r.inp.explicit && c.old) {
+    const pre = c.old.filter((o) => (o.year ? r.y0 <= o.year : true));
+    if (pre.length) {
+      const before = pre.filter((o) => !o.year || r.y0 < o.year);
+      const what = pre.map((o) => showCode(o.code) + " (" + o.name + (o.per ? ", " + sig(o.per, 7) + " per " + c.cur : ", at each year's official rate") + ")").join(" or ");
+      add(before.length ? "" : "note", "World Bank values for " + esc(nameOf(r.S)) + " are in " + c.cur + ", and the amount is read as " + c.cur + ". " +
+        (pre.some((o) => o.year) ? (before.length ? "In " + r.y0 + " prices were usually quoted in " : r.y0 + " is a changeover year; amounts may be in ") : "Amounts may also be in ") +
+        esc(what) + ". If the study reports that currency, choose it under <b>Amount is in</b>.",
+        before.length ? "read as " + c.cur + "; if the study used " + pre.map((o) => showCode(o.code)).join(" or ") + ", give that code" : "");
+    }
+  }
+  // C1: amount far above what the economy produces
+  if (ok(r.CS)) {
+    const sp = span("gdp", r.S);
+    if (sp) {
+      const gy = Math.min(Math.max(r.y0, sp[0]), sp[1]), g = raw("gdp", r.S, gy);
+      if (ok(g) && r.CS > 0.1 * g) {
+        add("bad", "The amount is " + sig((r.CS / g) * 100, 3) + "% of " + esc(nameOf(r.S)) + "'s GDP in " + gy + " (" + esc(money(g, r.sCur)) +
+          "). Check the amount and its currency unit: an amount in an old currency (" + (c.old ? esc(c.old.map((o) => showCode(o.code)).join(", ")) : "for example SLL for Sierra Leone") +
+          ") or in thousands would look like this.", "amount is " + sig((r.CS / g) * 100, 3) + "% of GDP: check the currency unit");
+      }
+    }
+  }
+  // C4: rebasing breaks in the standard deflator
+  if (r.P === "gdpd") {
+    const lo = Math.min(r.y0, r.y1), hi = Math.max(r.y0, r.y1);
+    Array.from(new Set([r.S, r.I])).forEach((iso) => {
+      const b = (DATA.breaks[iso] || []).filter((y) => y > lo && y <= hi);
+      if (b.length) {
+        add("", "The standard GDP deflator for " + esc(nameOf(iso)) + " jumps in " + b.join(", ") + " because the national accounts were rebased, not because prices rose. " +
+          "Choose <b>GDP deflator (linked series)</b> to remove the break.", "deflator rebasing break " + b.join(", ") + " (" + nameOf(iso) + ")");
+      }
+    });
+  }
+  // C5: official rate far from the rate money changed hands at
+  const fxSeen = new Set();
+  r.f.filter((x) => x.series === "fx" && ok(x.v) && !x.own).forEach((x) => {
+    const y = x.proj ? x.proj.from : x.y, k = x.iso + y;
+    if (fxSeen.has(k)) return;
+    fxSeen.add(k);
+    const o = raw("fx", x.iso, y), a = raw("fx_alt", x.iso, y);
+    if (ok(o) && ok(a) && Math.abs(Math.log(o / a)) > Math.log(1.1)) {
+      add("", "In " + y + " the official exchange rate for " + esc(nameOf(x.iso)) + " (" + rate(o) + " " + curOf(x.iso) + " per US$) differs from the World Bank's alternative conversion factor (" +
+        rate(a) + ") by " + fmt(Math.abs(o / a - 1) * 100, 0) + "%. The official rate may not be the rate money changed hands at (multiple or controlled rates). " +
+        "Consider <b>Alternative conversion factor</b> under Exchange rates from.", "official rate differs from alternative factor (" + nameOf(x.iso) + " " + y + ")");
+    }
+  });
+  // C6: projections
+  if (r.projected) {
+    const last = Math.min.apply(null, r.f.filter((x) => x.proj).map((x) => x.proj.from));
+    const how = PROJ.how === "weo" ? "price indices follow the IMF World Economic Outlook inflation forecasts (" + esc(DATA.meta.weo) + ", to " + LAST.weo +
+      ", the last rate held after that)" : "price indices grow at each country's average annual rate over its last " + PROJ.how + " years of data";
+    add("note", "Values after " + last + " are projected: " + how + ", exchange rates " + (PROJ.fx === "gap" ? "follow the inflation gap against the US" : "are held at the last observed rate") +
+      ". Projected results are rounded to 3 significant figures, with a range from the 5- and 20-year trend rules. Change the rates under Projection assumptions.", "uses projected values");
+    r.f.filter((x) => x.proj && x.proj.fallback).slice(0, 1).forEach((x) =>
+      add("note", "No IMF forecast for " + esc(nameOf(x.iso)) + ": its " + INDEX_NAME[x.series] + " is projected at its 10-year average rate.", ""));
+    const hot = new Set();
+    r.f.filter((x) => x.proj && IDX[x.series]).forEach((x) => {
+      const g = x.proj.how === "weo" ? x.proj.top : x.proj.g;
+      if (g > TREND_MAX && !hot.has(x.iso + x.series)) {
+        hot.add(x.iso + x.series);
+        add("", "The projection for " + esc(nameOf(x.iso)) + "'s " + INDEX_NAME[x.series] + " uses inflation of up to " + fmt(g * 100, 1) +
+          "% a year. Projections at this rate are very uncertain: type a rate under Projection assumptions or choose an earlier base year.", "projected inflation above 15% a year (" + nameOf(x.iso) + ")");
+      }
+    });
+  }
+  if (r.y1 !== r.y0 && ok(r.iS0) && ok(r.iS1)) {
+    const yrs = Math.abs(r.y1 - r.y0);
+    const annual = Math.pow(r.infS, 1 / yrs) - 1;
+    if (Math.abs(annual) > 0.15) {
+      add("", esc(nameOf(r.S)) + "'s " + INDEX_NAME[r.P] + " changes by an average of " + fmt(annual * 100, 1) +
+        "% a year between " + Math.min(r.y0, r.y1) + " and " + Math.max(r.y0, r.y1) +
+        ". With inflation this high, Kumaranayake (2000) advises working in US$ (Method 1), unless most of the cost is nontradable.", "high local inflation (" + fmt(annual * 100, 0) + "% a year)");
+    }
+  }
+  const FX = r.FX;
+  [r.S].concat(r.set.out === "LCU" && r.T !== r.S ? [r.T] : []).forEach((iso) => {
+    [r.y0, r.y1].filter((y, i, arr) => arr.indexOf(y) === i).forEach((y) => {
+      const pl = raw("ppp", iso, y) / raw(FX, iso, y);   // price level against the US (about 0.2 to 1.6 in practice)
+      if (ok(pl) && (pl < 0.05 || pl > 4)) {
+        add("bad", "For " + esc(nameOf(iso)) + " in " + y + ", the World Bank PPP factor and exchange rate imply a price level of " +
+          fmt(pl * 100, 1) + "% of the US level. The exchange rate is far from the rate money changed hands at, or the series use different units. Treat results for this year with caution.",
+          "price level " + fmt(pl * 100, 0) + "% of US (" + nameOf(iso) + " " + y + ")");
+      }
+    });
+    const a = raw("ppp", iso, r.y0), b = raw(FX, iso, r.y0), cc = raw("ppp", iso, r.y1), d = raw(FX, iso, r.y1);
+    if (ok(a) && ok(b) && ok(cc) && ok(d)) {
+      const k = (cc / d) / (a / b);
+      if (k > 3 || k < 1 / 3) {
+        add("", "For " + esc(nameOf(iso)) + ", the ratio of the PPP factor to the exchange rate changed " + fmt(Math.max(k, 1 / k), 1) + "-fold between " + r.y0 + " and " + r.y1 +
+          ". This usually means a large devaluation or very high inflation. Check the values used.", "PPP/exchange-rate ratio changed " + fmt(Math.max(k, 1 / k), 1) + "-fold");
+      }
+    }
+  });
+  // C7: PPP vintage
+  if (r.f.some((x) => x.series === "ppp" && !x.own) && Math.min(r.y0, r.y1) < 2021) {
+    add("note", "World Bank PPP factors are revised back in time at each ICP benchmark (2011, 2017, 2021); these values are on the 2021 basis. " +
+      "Studies that converted with earlier PPPs may differ for the same year; report the data vintage shown at the top of the page.", "");
+  }
+  Array.from(new Set([r.S].concat(r.set.out === "LCU" ? [r.T] : []))).forEach((iso) => {
+    if (CTRY[iso] && CTRY[iso].note) add("note", esc(CTRY[iso].note).replace(/\.?$/, "."), "");
+  });
+  if (r.f.some((x) => x.own)) add("note", "Some values were typed in by hand (marked <i>Your value</i>).", "uses your values");
+  return out;
+}
+const rateUnit = (iso, basis) => curOf(iso) + " per " + (basis.indexOf("fx") === 0 ? "US$" : "I$");
+
+/* ---------- reading the form ---------- */
+function readSet() {
+  return {
+    y1: +$("y1").value, out: $("out").value, tIso: $("tcountry").value, basis: $("basis").value,
+    measure: $("measure").value, fxSrc: $("fxSrc").value, pppSrc: $("pppSrc").value, share: +$("share").value / 100,
+  };
+}
+function readInp() {
+  const p = parseAmount($("cost").value, DEC());
+  return { cost: p.v, amb: p.amb, err: p.err, cur: $("cur").value, iso: $("country").value, y0: +$("y0").value,
+           old: !$("oldBox").hidden ? $("old").value : "" };
+}
+const mainM = () => (HAS_DOM ? $("wordM").value : "2");
+
+/* ---------- one cost: step chains ---------- */
+const node = (v, note) => ({ t: "node", v: v, note: note });
+const op = (v, why, proj) => ({ t: "op", v: v, why: why, proj: !!proj });
+const isProj = (r, role) => r.f.some((x) => x.role === role && x.proj);
+function infWho(r) { return r.I === "USA" ? "US" : nameOf(r.I); }
+function startItems(r) {
+  const cur = r.inp.cur, sCur = r.sCur;
+  if (cur === "USD" || cur === "INT") {
+    const u = cur === "USD" ? "US$" : "I$";
+    return [node(money(r.inp.cost, u), r.y0 + " prices"),
+            op("× " + rate(r.inRate), sCur + " per " + u + ", " + r.y0 + ", back to local", isProj(r, "in")),
+            node(money(r.CS, sCur), r.y0 + " prices")];
+  }
+  if (r.old) {
+    const code = showCode(r.old.code);
+    return [node(money(r.inp.cost, code), r.y0 + " prices"),
+            op("÷ " + rate(r.oldDiv), code + " per " + sCur + (r.old.rate ? ", " + r.y0 : ", fixed"), isProj(r, "old")),
+            node(money(r.CS, sCur), r.y0 + " prices")];
+  }
+  return [node(money(r.CS, sCur), r.y0 + " prices")];
+}
+function convOp(r, at, cross, rS, proj) {
+  if (r.same) return null;
+  if (r.set.out === "LCU") return op("× " + rate(cross), r.tCur + " per " + r.sCur + ", " + at + (r.basis.indexOf("fx") === 0 ? "" : ", PPP"), proj);
+  return op("÷ " + rate(rS), rateUnit(r.S, r.basis) + ", " + at, proj);
+}
+function m1Items(r, scale) {
+  const it = [];
+  const c = convOp(r, r.y0, r.cross0, r.rS0, isProj(r, "rS0") || isProj(r, "rT0"));
+  if (c) it.push(c, node(money(r.CS * scale * r.cross0, r.tCur), r.y0 + " prices"));
+  const pT = r.I === r.S ? isProj(r, "iS0") || isProj(r, "iS1") : isProj(r, "iT0") || isProj(r, "iT1");
+  it.push(op("× " + fac(r.infT), infWho(r) + " " + INDEX_NAME[r.P] + ", " + r.y1 + "÷" + r.y0, pT),
+          node(money(r.CS * scale * r.cross0 * r.infT, r.tCur), r.y1 + " prices"));
+  return it;
+}
+function m2Items(r, scale) {
+  const it = [op("× " + fac(r.infS), nameOf(r.S) + " " + INDEX_NAME[r.P] + ", " + r.y1 + "÷" + r.y0, isProj(r, "iS0") || isProj(r, "iS1")),
+              node(money(r.CS * scale * r.infS, r.sCur), r.y1 + " prices")];
+  const c = convOp(r, r.y1, r.cross1, r.rS1, isProj(r, "rS1") || isProj(r, "rT1"));
+  if (c) it.push(c, node(money(r.CS * scale * r.infS * r.cross1, r.tCur), r.y1 + " prices"));
+  return it;
+}
+function chainHTML(items) {
+  return '<ol class="chain">' + items.map((x) => x.t === "node"
+    ? '<li class="node"><b>' + esc(x.v) + "</b><small>" + esc(x.note) + "</small></li>"
+    : '<li class="op"><b>' + esc(x.v) + "</b><small>" + esc(x.why) + (x.proj ? ' <span class="pj">projected</span>' : "") + "</small></li>").join("") + "</ol>";
+}
+function flowHTML(m, body) {
+  return '<div class="flow m' + m + '"><div class="fl-lab"><span class="mk" aria-hidden="true"></span>Method ' + m + '</div><div class="fl-body">' + body + "</div></div>";
+}
+function tile(m, sub, v, r, max, main, bd) {
+  const w = v == null || max <= 0 ? 0 : (v / max) * 100;
+  const range = r.projected && bd && v != null ? '<span class="band">Range ' + esc(num(bd[0], true)) + " to " + esc(num(bd[1], true)) + " (5- and 20-year trends)</span>" : "";
+  return '<div class="tile m' + m + (main ? " main" : "") + '"><div class="t-top"><span class="mk" aria-hidden="true"></span>Method ' + m +
+    '<span class="role' + (main ? " main" : "") + '">' + (main ? "Main result" : "Sensitivity") + "</span></div>" +
+    '<p class="t-sub">' + esc(sub) + '</p><p class="big">' + (v == null ? "—" : esc(money(v, r.tCur, r.projected))) + "</p>" +
+    '<div class="t-bar"><span style="width:' + w.toFixed(1) + '%"></span></div>' +
+    '<p class="big-sub">' + (v == null ? "Missing data: see the note above" : r.y1 + " prices" + (r.projected ? ' · <span class="pj">projected</span>' : "")) + "</p>" +
+    (range ? '<p class="big-sub">' + range + "</p>" : "") + "</div>";
+}
+function whichLine(m, r) {
+  const p = Math.round(r.set.share * 100);
+  if (m === "2") return "Method 2 is the main result: local inflation, then conversion at the base-year rate. With PPP and the GDP deflator this is the CCEMG–EPPI default, and it needs no tradable share. Methods 1 and 3 (" + p + "% tradable) are sensitivity analyses.";
+  if (m === "1") return "Method 1 is the main result: suits mostly tradable resources, or local inflation above about 15–20% a year. Methods 2 and 3 are sensitivity analyses.";
+  return "Method 3 is the main result with " + p + "% tradable: state where the split comes from. Methods 1 and 2 are sensitivity analyses.";
+}
+
+function renderOne() {
+  const inp = readInp(), set = readSet();
+  if (inp.cost == null) {
+    $("alerts").innerHTML = '<div class="alert bad">Type the amount as a number, for example 1,000,000 or 2500.50 (' + esc(inp.err || "not a number") + "). " +
+      "Set <b>Decimal mark</b> if the study writes 2.500,50.</div>";
+    ["tiles", "flows"].forEach((id) => { $(id).innerHTML = ""; });
+    $("spread").textContent = ""; $("which").textContent = "";
+    return;
+  }
+  PROJ_LOG.clear();
+  const r = compute(inp, set);
+  const al = checks(r);
+  if (inp.amb) al.unshift({ cls: "note", text: "The amount was read as " + esc(num(inp.cost)) + ". If the separator is a decimal mark, set <b>Decimal mark</b> to comma or point." });
+  $("alerts").innerHTML = al.map((a) => '<div class="alert ' + a.cls + '">' + a.text + "</div>").join("");
+
+  const m = mainM();
+  const bd = r.projected ? band(inp, set, r) : null;
+  const p = Math.round(set.share * 100);
+  const sub1 = r.same ? "Inflate with " + nameOf(r.S) + " prices" : "Exchange at " + r.y0 + " rate, then " + infWho(r) + " inflation";
+  const sub2 = r.same ? "Inflate with " + nameOf(r.S) + " prices" : nameOf(r.S) + " inflation, then exchange at " + r.y1 + " rate";
+  const sub3 = p + "% tradable via Method 1, " + (100 - p) + "% via Method 2";
+  const vals = [r.v1, r.v2, r.v3];
+  const max = Math.max.apply(null, vals.filter((v) => v != null).concat([0]));
+  $("tiles").innerHTML = [[1, sub1], [2, sub2], [3, sub3]].map((t) => tile(t[0], t[1], vals[t[0] - 1], r, max, String(t[0]) === m, bd && bd[t[0] - 1])).join("");
+  $("which").textContent = whichLine(m, r);
+
+  if (r.v1 != null && r.v2 != null && r.v1 > 0) {
+    const d = (r.v2 / r.v1 - 1) * 100;
+    $("spread").textContent = Math.abs(d) < 0.05 ? "Methods 1 and 2 agree here." :
+      "Method 2 gives " + fmt(Math.abs(d), 1) + "% " + (d > 0 ? "more" : "less") + " than Method 1: " + nameOf(r.S) +
+      "'s inflation (× " + fac(r.infS) + ") set against " + infWho(r) + " inflation (× " + fac(r.infT) + ") and the change in the " +
+      r.sCur + " to " + r.tCur + " rate.";
+  } else $("spread").textContent = "";
+
+  const start = startItems(r);
+  let fl = "";
+  fl += flowHTML(1, r.ok1 ? chainHTML(start.concat(m1Items(r, 1))) : '<p class="src miss">Missing data</p>');
+  fl += flowHTML(2, r.ok2 ? chainHTML(start.concat(m2Items(r, 1))) : '<p class="src miss">Missing data</p>');
+  if (r.ok1 && r.ok2) {
+    const s = set.share;
+    fl += flowHTML(3,
+      '<div class="fl-tag">Tradable ' + p + "%, Method 1</div>" + chainHTML([node(money(r.CS * s, r.sCur), r.y0 + " prices")].concat(m1Items(r, s))) +
+      '<div class="fl-tag">Nontradable ' + (100 - p) + "%, Method 2</div>" + chainHTML([node(money(r.CS * (1 - s), r.sCur), r.y0 + " prices")].concat(m2Items(r, 1 - s))) +
+      '<p class="fl-sum">' + esc(money(s * r.v1, r.tCur)) + " + " + esc(money((1 - s) * r.v2, r.tCur)) + " = <b>" + esc(money(r.v3, r.tCur)) + "</b> <span class=\"src\">" + r.y1 + " prices</span></p>");
+  } else fl += flowHTML(3, '<p class="src miss">Needs both Method 1 and Method 2</p>');
+  $("flows").innerHTML = fl;
+
+  renderValues(r);
+  renderMatrix(inp, set);
+  renderWording(r);
+  renderProj();
+  $("projBox").hidden = !(PROJ_LOG.size || r.projected || r.y0 > 2024 || r.y1 > 2024);
+}
+
+function roleText(x, r) {
+  const unit = IDX[x.series] ? "index" : x.series === "oldfx" ? showCode(r.old ? r.old.code : "") + " per " + curOf(x.iso)
+    : curOf(x.iso) + " per " + (x.series.indexOf("fx") === 0 ? "US$" : "I$");
+  const what = { gdpd_l: "GDP deflator", gdpd: "GDP deflator (standard)", cpi: "Consumer price index", fx: "Exchange rate", fx_alt: "Exchange rate (alternative)",
+                 ppp: "PPP factor", ppp_oecd: "PPP factor (OECD)", oldfx: "Old-currency rate" }[x.series];
+  const who = r.I === "USA" ? "US" : "Output-country";
+  const use = {
+    in: "Back to local currency", old: "Old currency to " + curOf(x.iso),
+    rS0: "Method 1 conversion", rS1: "Method 2 conversion", rT0: "Method 1 conversion", rT1: "Method 2 conversion",
+    iS0: "Local inflation (Method 2)", iS1: "Local inflation (Method 2)",
+    iT0: who + " inflation (Method 1)", iT1: who + " inflation (Method 1)",
+  }[x.role];
+  return { what: what, unit: unit, use: use };
+}
+function projSource(p) {
+  if (p.how === "weo") return "Projected from " + p.from + " with IMF WEO inflation" + (p.held ? " (" + p.end + " rate held after " + p.end + ")" : "");
+  if (p.how === "trend") return "Projected from " + p.from + " at " + pct(p.g) + " a year" + (p.own ? " (your rate)" : " (" + p.n + "-year average)");
+  if (p.how === "hold") return "Projected: held at the " + p.from + " value";
+  return "Projected from " + p.from + " with the inflation gap";
+}
+function renderValues(r) {
+  const rows = r.f.map((x) => {
+    const t = roleText(x, r);
+    const srcCls = x.own ? "src own" : x.proj ? "src proj" : ok(x.v) ? "src" : "src miss";
+    const src = x.own ? "Your value" : x.proj ? projSource(x.proj) : ok(x.v) ? CODE[x.series] : x.stale ? "Series ends in " + x.last : "No data";
+    const shown = x.v == null ? "" : x.proj ? String(+x.v.toPrecision(8)) : String(x.v);
+    return "<tr><td>" + esc(t.what) + ' <span class="src">· ' + esc(t.use) + "</span></td><td>" + esc(nameOf(x.iso)) + '</td><td class="n">' + x.y +
+      '</td><td class="n"><input type="text" class="ov' + (x.own ? " own" : x.proj ? " projected" : "") + '" inputmode="decimal" data-k="' + esc(x.k) +
+      '" aria-label="' + esc(t.what + ", " + nameOf(x.iso) + ", " + x.y) + '" value="' + esc(shown) +
+      '" placeholder="no data"></td><td class="src">' + esc(t.unit) + '</td><td class="' + srcCls + '">' + esc(src) + "</td></tr>";
+  });
+  $("vals").innerHTML = '<thead><tr><th>Value</th><th>Country</th><th class="n">Year</th><th class="n">Value</th><th>Unit</th><th>Source</th></tr></thead><tbody>' + rows.join("") + "</tbody>";
+  const n = Object.keys(OV).length;
+  $("ovCount").textContent = n ? n + " value" + (n > 1 ? "s" : "") + " typed in by hand" : "";
+  $("resetBtn").hidden = !n;
+}
+function renderProj() {
+  const keys = Array.from(PROJ_LOG.keys()).sort();
+  $("projSec").hidden = !keys.length;
+  if (!keys.length) return;
+  const rows = keys.map((key) => {
+    const parts = key.split(":"), series = parts[0], iso = parts[1], e = PROJ_LOG.get(key);
+    const own = e.how === "own";
+    let basis;
+    if (own) basis = "Your rate";
+    else if (e.how === "weo") {
+      const s = [];
+      for (let y = e.to + 1; y <= e.end; y++) s.push(y + " " + fmt(raw("weo", iso, y), 1) + "%");
+      basis = "IMF WEO: " + s.join(", ") + (e.end < YEAR_END ? "; " + e.end + " rate held after" : "");
+    } else basis = (e.fallback ? "No IMF forecast; " : "") + e.n + "-year average, " + e.from + "–" + e.to + ": " + pct(e.g);
+    return "<tr><td>" + esc(nameOf(iso)) + "</td><td>" + esc(INDEX_LONG[series]) + '</td><td class="n">' + (e.to || "") +
+      '</td><td class="' + (own ? "src own" : "src") + '">' + esc(basis) + '</td><td class="n"><input type="text" class="ov rate' + (own ? " own" : "") + '" inputmode="decimal" data-g="g:' + esc(key) +
+      '" aria-label="' + esc("Your annual rate for " + nameOf(iso) + " " + INDEX_LONG[series]) + '" value="' + (own ? (e.g * 100).toFixed(2) : "") + '" placeholder="type a rate"> %</td></tr>';
+  });
+  $("projTable").innerHTML = '<thead><tr><th>Country</th><th>Index</th><th class="n">Last data year</th><th>Rate used</th><th class="n">Your rate a year</th></tr></thead><tbody>' + rows.join("") + "</tbody>";
+}
+
+function renderMatrix(inp, set) {
+  const cols = [["USD", null, "US$"], ["INT", null, "I$"], ["LCU", inp.iso, curOf(inp.iso)]];
+  if (set.out === "LCU" && set.tIso !== inp.iso) cols.push(["LCU", set.tIso, curOf(set.tIso)]);
+  const keepLog = new Map(PROJ_LOG);
+  const res = cols.map((c) => compute(inp, Object.assign({}, set, { out: c[0], tIso: c[1] || set.tIso })));
+  PROJ_LOG.clear(); keepLog.forEach((v, k) => PROJ_LOG.set(k, v));
+  let h = "<thead><tr><th></th>" + cols.map((c) => '<th class="n">' + esc(c[2]) + "</th>").join("") + "</tr></thead><tbody>";
+  ["v1", "v2", "v3"].forEach((k, i) => {
+    h += '<tr><td><span class="mk m' + (i + 1) + '" style="margin-right:6px" aria-hidden="true"></span>Method ' + (i + 1) + "</td>" +
+      res.map((r) => '<td class="n">' + esc(num(r[k], r.projected)) + "</td>").join("") + "</tr>";
+  });
+  $("matrix").innerHTML = h + "</tbody>";
+}
+
+function basisName(b) {
+  return b === "fx" ? "official exchange rate (period average)" : b === "fx_alt" ? "World Bank alternative conversion factor" : "PPP conversion factor for GDP";
+}
+function sourcesText(r) {
+  const used = Array.from(new Set(r.f.map((x) => x.series)));
+  const wb = used.filter((s) => s !== "ppp_oecd").map((s) => CODE[s].replace("World Bank ", "").replace(/ \(.*\)$/, ""));
+  return (wb.length ? "World Bank World Development Indicators (" + Array.from(new Set(wb)).join(", ") + "; last updated " + DATA.meta.wdiText + ")" : "") +
+    (used.indexOf("ppp_oecd") >= 0 ? (wb.length ? " and " : "") + "OECD purchasing power parities for GDP" : "");
+}
+function renderWording(r) {
+  const m = mainM();
+  const cost = r.inp.cur === "USD" ? money(r.inp.cost, "US$") : r.inp.cur === "INT" ? money(r.inp.cost, "I$") :
+    r.old ? money(r.inp.cost, showCode(r.old.code)) : money(r.inp.cost, r.sCur);
+  const pre = r.inp.cur === "USD" || r.inp.cur === "INT"
+    ? "The reported " + (r.inp.cur === "USD" ? "US$" : "international dollar") + " amount was first converted back to " + r.sCur + " at the " + r.y0 + " " + basisName(r.inp.cur === "USD" ? r.FX : "ppp") + ". "
+    : r.old ? "The amount in " + showCode(r.old.code) + " was converted to " + r.sCur + (r.old.rate ? " at the " + r.y0 + " official exchange rate. " : " at the fixed conversion rate (" + sig(r.old.per, 7) + " " + showCode(r.old.code) + " per " + r.sCur + "). ") : "";
+  const conv = (y) => r.same ? "" : (r.set.out === "INT" ? "converted to international dollars with the " + y + " PPP conversion factor for GDP"
+    : "converted to " + r.tCur + " at the " + y + " " + basisName(r.basis));
+  const infl = (iso) => "adjusted from " + r.y0 + " to " + r.y1 + " prices with the " + (iso === "USA" ? "United States" : nameOf(iso)) + " " + INDEX_LONG[r.P];
+  let txt;
+  if (r.same) txt = "Costs were " + infl(r.S) + ". ";
+  else if (m === "1") txt = "Costs were " + conv(r.y0) + " and then " + infl(r.I) + " (method 1 of Turner et al., 2019). ";
+  else if (m === "2") txt = "Costs were " + infl(r.S) + " and then " + conv(r.y1) + " (method 2 of Turner et al., 2019" +
+    (r.set.out === "INT" && r.P !== "cpi" ? ", as in the CCEMG–EPPI Cost Converter" : "") + "). ";
+  else {
+    const p = Math.round(r.set.share * 100);
+    txt = "Costs were split into tradable (" + p + "%) and nontradable (" + (100 - p) + "%) resources (method 3 of Turner et al., 2019). Tradable resources were " +
+      conv(r.y0) + " and then " + infl(r.I) + ". Nontradable resources were " + infl(r.S) + " and then " + conv(r.y1) + ". ";
+  }
+  if (!r.same) {
+    const others = ["1", "2", "3"].filter((k) => k !== m);
+    txt += "Methods " + others.join(" and ") + " were used as sensitivity analyses. ";
+  }
+  const v = r["v" + m];
+  const own = r.f.some((x) => x.own) ? " Some rates or indices were entered from other sources." : "";
+  let proj = "";
+  if (r.projected) {
+    const last = Math.min.apply(null, r.f.filter((x) => x.proj).map((x) => x.proj.from));
+    proj = " Values after " + last + " were projected: price indices " + (PROJ.how === "weo" ? "with the IMF World Economic Outlook inflation forecasts (" + DATA.meta.weo + ")"
+      : "at each country's average annual rate over its preceding " + PROJ.how + " years of data") +
+      (Array.from(PROJ_LOG.keys()).some((k) => has(OV, "g:" + k)) ? " (or the stated rates)" : "") +
+      (r.f.some((x) => x.proj && x.proj.how === "gap") ? ", and conversion rates in line with the inflation difference against the United States" : "") + ".";
+  }
+  $("wording").textContent = pre + txt + "Price indices and conversion rates were taken from the " + sourcesText(r) + ", using the Health Cost Converter " + VERSION +
+    " (" + SITE + ")." + own + proj +
+    (v != null ? " For example, " + cost + " in " + r.y0 + " prices is " + money(v, r.tCur, r.projected) + " in " + r.y1 + " prices." : "");
+}
+
+/* ---------- a list of costs ---------- */
+const NORM = (s) => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]/g, "");
+const NAMEIDX = {};
+DATA.countries.forEach((c) => [c.name, c.iso].concat(c.alt || []).forEach((n) => { const k = NORM(n); if (k && !NAMEIDX[k]) NAMEIDX[k] = c.iso; }));
+function findCountry(s) {
+  const k = NORM(s);
+  if (!k) return null;
+  if (NAMEIDX[k]) return NAMEIDX[k];
+  const hits = Object.keys(NAMEIDX).filter((n) => n.startsWith(k) || (k.length > 4 && n.indexOf(k) >= 0));
+  const isos = Array.from(new Set(hits.map((h) => NAMEIDX[h])));
+  return isos.length === 1 ? isos[0] : null;
+}
+const SYMBOL = { "€": "EUR", "£": "GBP", "¥": "JPY", "₹": "INR", "₫": "VND", "₦": "NGN", "₱": "PHP", "₩": "KRW", "R$": "BRL" };
+function readCurrency(s, iso) {
+  let t = String(s || "").trim().toUpperCase();
+  if (has(SYMBOL, t)) t = SYMBOL[t];
+  const c = CTRY[iso];
+  if (!t || t === "LCU" || t === "LOCAL") return { cur: "LCU" };
+  if (t === c.cur) return { cur: "LCU", explicit: true };
+  if (t === "USD" || t === "US$" || t === "$" || t === "US DOLLAR" || t === "US DOLLARS") return { cur: "USD" };
+  if (t === "I$" || t === "INT" || t === "INTL" || t === "INT$" || t === "PPP" || t === "INTERNATIONAL $" || t === "INTERNATIONAL DOLLARS") return { cur: "INT" };
+  const o = (c.old || []).find((x) => x.code === t || showCode(x.code).toUpperCase() === t);
+  if (o) return { cur: "LCU", old: o.code };
+  return { err: "currency " + t + " does not match " + c.name + " (" + c.cur + (c.old ? ", or " + c.old.map((x) => showCode(x.code)).join(", ") : "") + ")" };
+}
+// Fiscal years: "2015", "2015/16", "2015-2016", "FY2016". fy: cal (only single years), start, end, avg.
+function readYear(s, fy) {
+  const t = String(s || "").trim();
+  const m = t.match(/^(?:FY\s*)?(\d{4})(?:\s*[/\-–]\s*(\d{2}|\d{4}))?$/i);
+  if (!m) return { err: "price year not recognised" };
+  const a = +m[1];
+  if (!m[2]) return { y: a };
+  const b = m[2].length === 2 ? Math.floor(a / 100) * 100 + +m[2] + (+m[2] < a % 100 ? 100 : 0) : +m[2];
+  if (b !== a + 1) return { err: "year range " + t + " is not one fiscal year" };
+  if (fy === "start") return { y: a, fy: t };
+  if (fy === "end") return { y: b, fy: t };
+  if (fy === "avg") return { y: a, y2: b, fy: t };
+  return { err: "fiscal year " + t + ": choose how to read fiscal years" };
+}
+const FIELDS = [["label", "Study"], ["cost", "Amount"], ["country", "Country"], ["year", "Price year"], ["cur", "Currency"]];
+const EXACT = {
+  label: ["study", "label", "reference", "ref", "source", "author", "citation", "name", "id"],
+  cost: ["amount", "cost", "value", "unitcost", "totalcost", "costamount", "reportedcost"],
+  country: ["country", "setting", "countrywhereincurred", "location", "iso3", "iso"],
+  year: ["priceyear", "costyear", "yearofprices", "pricebaseyear", "currencyyear", "year"],
+  cur: ["currency", "reportedin", "cur", "currencyreported"],
+};
+const LOOSE = { label: /study|label|reference|author|source/, cost: /amount|cost|value/, country: /country|setting/, year: /year/, cur: /curr|reportedin/ };
+const LOOSE_NOT = { cost: /item|type|category|description|year|currency|source|component/, year: /publi|study|data/ };
+function guessMap(head) {
+  const h = head.map(NORM), map = {}, taken = new Set();
+  FIELDS.forEach((f) => {                                       // exact names first, in order of preference
+    for (const name of EXACT[f[0]]) { const i = h.findIndex((x, j) => x === name && !taken.has(j)); if (i >= 0) { map[f[0]] = i; taken.add(i); return; } }
+  });
+  FIELDS.forEach((f) => {                                       // then looser matches
+    if (has(map, f[0])) return;
+    const hits = h.map((x, j) => j).filter((j) => !taken.has(j) && LOOSE[f[0]].test(h[j]) && !(LOOSE_NOT[f[0]] && LOOSE_NOT[f[0]].test(h[j])));
+    const pick = f[0] === "year" ? hits.find((j) => /price/.test(h[j])) : null;
+    map[f[0]] = pick != null ? pick : hits.length ? hits[0] : -1;
+    if (map[f[0]] >= 0) taken.add(map[f[0]]);
+  });
+  return map;
+}
+// Pure: text -> {rows, head, map, err}. Used by the page and by the tests.
+function convertList(text, set, opt) {
+  opt = opt || {};
+  const dec = opt.dec || "auto", fy = opt.fy || "cal";
+  const lines = String(text).split(/\r?\n/).filter((l) => l.trim());
+  const split = (l) => (l.indexOf("\t") >= 0 ? l.split("\t") : l.indexOf(";") >= 0 ? l.split(";") : l.split(","));
+  let head = null, map = { label: 0, cost: 1, country: 2, year: 3, cur: 4 };
+  if (lines.length && split(lines[0]).every((c) => parseAmount(c, dec).v == null)) {
+    head = split(lines.shift()).map((x) => x.trim());
+    map = guessMap(head);
+  }
+  if (opt.map) Object.keys(opt.map).forEach((k) => { map[k] = opt.map[k]; });
+  const err = map.cost < 0 ? "No Amount column found: choose it under Columns." : map.country < 0 ? "No Country column found: choose it under Columns." :
+    map.year < 0 ? "No Price year column found: choose it under Columns." : "";
+  const m = mainM();
+  const rows = lines.map((l) => {
+    const c = split(l).map((x) => x.trim());
+    const cell = (k) => (map[k] >= 0 ? c[map[k]] || "" : "");
+    const row = { label: cell("label"), amount: cell("cost"), country: cell("country"), year: cell("year"), curText: cell("cur"),
+                  v: [null, null, null], note: "", warn: "", proj: false, yUsed: "" };
+    if (err) { row.note = err.replace(/:.*/, ""); return row; }
+    const pa = parseAmount(row.amount, dec), iso = findCountry(row.country), yr = readYear(row.year, fy);
+    if (pa.v == null) { row.note = "amount is not a number (" + pa.err + ")"; return row; }
+    if (!iso) { row.note = "country not recognised"; return row; }
+    if (yr.err) { row.note = yr.err; return row; }
+    if (!(yr.y >= YMIN && (yr.y2 || yr.y) <= YEAR_END)) { row.note = "price year outside " + YMIN + "–" + YEAR_END; return row; }
+    const cc = readCurrency(row.curText, iso);
+    if (cc.err) { row.note = cc.err; return row; }
+    row.countryName = nameOf(iso);
+    row.iso = iso;
+    const runs = [yr.y].concat(yr.y2 ? [yr.y2] : []).map((y) => compute({ cost: pa.v, cur: cc.cur, iso: iso, y0: y, old: cc.old || "", explicit: !!cc.explicit }, set));
+    const mean = (k) => (runs.every((r) => r[k] != null) ? runs.reduce((s, r) => s + r[k], 0) / runs.length : null);
+    row.v = [mean("v1"), mean("v2"), mean("v3")];
+    row.yUsed = yr.y2 ? "avg " + yr.y + "/" + yr.y2 : String(yr.y);
+    row.proj = runs.some((r) => r.projected);
+    const cks = [];
+    runs.forEach((r) => checks(r).forEach((k) => { if (k.short && !cks.some((x) => x.short === k.short)) cks.push(k); }));
+    if (pa.amb) cks.unshift({ cls: "note", short: "amount read as " + num(pa.v) + " (check the decimal mark)" });
+    if (yr.fy) cks.push({ cls: "note", short: "fiscal year " + yr.fy + " read as " + row.yUsed });
+    row.bad = cks.some((k) => k.cls === "bad") || row.v[+m - 1] == null;
+    const txt = cks.map((k) => k.short).join("; ");
+    if (row.bad) row.note = txt || "no result"; else row.warn = txt;
+    row.f = runs[0].f;
+    return row;
+  });
+  return { rows: rows, head: head, map: map, err: err };
+}
+const EXAMPLE_LIST = [
+  "Study\tAmount\tCountry\tPrice year\tCurrency",
+  "Example A\t1,000,000\tViet Nam\t2006\tVND",
+  "Example B\t100\tVietnam\t2006\tUSD",
+  "Example C\t2500\tIndia\t2012\tINR",
+  "Example D\t850\tGermany\t1997\tDEM",
+  "Example E\t1200\tUnited Kingdom\t2015/16\tGBP",
+].join("\n");
+let LIST = { rows: [], head: null, map: {} };
+let LISTMAP = null, LISTHEAD = "";
+function outLabel(set) { return set.out === "USD" ? "US$" : set.out === "INT" ? "I$" : curOf(set.tIso); }
+function renderMap(res) {
+  const n = Math.max.apply(null, [0].concat($("list").value.split(/\r?\n/).filter((l) => l.trim()).slice(0, 5).map((l) =>
+    (l.indexOf("\t") >= 0 ? l.split("\t") : l.indexOf(";") >= 0 ? l.split(";") : l.split(",")).length)));
+  const opts = [[-1, "(none)"]].concat(Array.from({ length: n }, (_, i) => [i, (i + 1) + ": " + (res.head ? res.head[i] || "" : "column " + (i + 1))]));
+  $("listMap").innerHTML = FIELDS.map((f) => '<label>' + esc(f[1]) + '<select data-f="' + f[0] + '">' +
+    opts.map((o) => '<option value="' + o[0] + '"' + (res.map[f[0]] === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>").join("") + "</select></label>").join("");
+  $("mapNote").textContent = res.head ? "Columns matched by their names. Check them, and change any that are wrong." :
+    "No header row found: columns are read in the order Study, Amount, Country, Price year, Currency. Add a header row or change them here.";
+}
+function renderList() {
+  const set = readSet();
+  const firstLine = ($("list").value.split(/\r?\n/).find((l) => l.trim()) || "");
+  if (firstLine !== LISTHEAD) { LISTHEAD = firstLine; LISTMAP = null; }
+  PROJ_LOG.clear();
+  LIST = convertList($("list").value, set, { dec: DEC(), fy: $("fy").value, map: LISTMAP });
+  renderMap(LIST);
+  const outCur = outLabel(set), m = mainM();
+  const p = Math.round(set.share * 100);
+  const nOV = Object.keys(OV).length;
+  $("listTitle").textContent = "Converted costs, " + outCur + " at " + set.y1 + " prices";
+  $("listLead").textContent = INDEX_LONG[set.measure].replace(/^./, (s) => s.toUpperCase()) + "; main result Method " + m + "; Method 3 with " + p + "% tradable. Change these under Convert to." +
+    (nOV ? " " + nOV + " value" + (nOV > 1 ? "s" : "") + " typed in by hand under One cost also apply here; rows that use them say so." : "");
+  const head = '<thead><tr><th>Study</th><th class="n">Amount</th><th>Country</th><th class="n">Year</th><th>Currency</th>' +
+    [1, 2, 3].map((i) => '<th class="n"><span class="mk m' + i + '" style="margin-right:5px" aria-hidden="true"></span>Method ' + i + (String(i) === m ? " (main)" : "") + "</th>").join("") + "<th>Notes</th></tr></thead>";
+  const body = LIST.rows.map((r) => "<tr><td>" + esc(r.label) + '</td><td class="n">' + esc(r.amount) + "</td><td>" + esc(r.countryName || r.country) +
+    '</td><td class="n">' + esc(r.year) + "</td><td>" + esc(r.curText || "local") + "</td>" +
+    r.v.map((v) => '<td class="n">' + (v == null ? "—" : esc(money(v, outCur, r.proj))) + "</td>").join("") +
+    '<td class="flag' + (r.note ? " bad" : r.proj ? " pj" : "") + '">' + esc(r.note || r.warn || "") + "</td></tr>").join("");
+  $("listTable").innerHTML = head + "<tbody>" + (body || '<tr><td colspan="9">Paste at least one row.</td></tr>') + "</tbody>";
+  const bad = LIST.rows.filter((r) => r.note).length, anyProj = LIST.rows.some((r) => r.proj);
+  $("listAlerts").innerHTML = (LIST.err ? '<div class="alert bad">' + esc(LIST.err) + "</div>" : "") +
+    (bad && !LIST.err ? '<div class="alert bad">' + bad + " row" + (bad > 1 ? "s" : "") + " could not be converted, or need checking. The Notes column says why.</div>" : "") +
+    (anyProj ? '<div class="alert note">Some rows use values projected beyond the data; they are rounded to 3 significant figures. The settings under Years after the data apply.</div>' : "");
+  $("listMsg").textContent = "";
+  $("projBox").hidden = !(anyProj || set.y1 > 2024);
+}
+function listAsRows() {
+  const set = readSet(), outCur = outLabel(set), m = mainM();
+  const head = ["Study", "Amount", "Country", "Price year", "Year used", "Currency"]
+    .concat([1, 2, 3].map((i) => "Method " + i + " (" + outCur + ", " + set.y1 + " prices)"), ["Main result, rounded (Method " + m + ")", "Notes"]);
+  const rows = LIST.rows.map((r) => [r.label, r.amount, r.countryName || r.country, r.year, r.yUsed, r.curText || "local"]
+    .concat(r.v.map(full), [r.v[+m - 1] == null ? "" : num(r.v[+m - 1], r.proj).replace(/,/g, ""), r.note || r.warn || ""]));
+  const ov = Object.keys(OV).map((k) => k + "=" + OV[k]).join("; ");
+  const foot = [[], ["Health Cost Converter " + VERSION, SITE],
+    ["Data", "World Bank WDI last updated " + DATA.meta.wdi_updated + " (retrieved " + DATA.meta.wdi_retrieved + "); IMF WEO " + DATA.meta.weo + "; OECD PPPs"],
+    ["Series", [CODE[set.measure], CODE[set.out === "INT" || set.basis === "ppp" ? set.pppSrc : set.fxSrc], CODE[set.fxSrc]].filter((x, i, a) => a.indexOf(x) === i).join("; ")],
+    ["Settings", "output " + outCur + "; base year " + set.y1 + "; " + INDEX_LONG[set.measure] + "; exchange rates " + basisName(set.fxSrc) + "; tradable share " + Math.round(set.share * 100) + "%; " +
+      "projection " + (PROJ.how === "weo" ? "IMF WEO" : PROJ.how + "-year trend") + "; fiscal years " + $("fy").value],
+    ["Your values", ov || "none"]];
+  return [head].concat(rows, foot);
+}
+
+/* ---------- permalink ---------- */
+const LINK = { cost: "cost", cur: "cur", old: "old", c: "country", y0: "y0", y1: "y1", out: "out", tc: "tcountry", basis: "basis", m: "measure",
+               fx: "fxSrc", ppp: "pppSrc", s: "share", main: "wordM", proj: "projYears", pfx: "projFx", dec: "dec" };
+function linkHash() {
+  const p = new URLSearchParams();
+  Object.keys(LINK).forEach((k) => { if (k !== "old" || !$("oldBox").hidden) p.set(k, $(LINK[k]).value); });
+  const ov = Object.keys(OV).map((k) => k + "=" + OV[k]).join(";");
+  if (ov) p.set("ov", ov);
+  return "#calc?" + p.toString();
+}
+function applyHash() {
+  const h = location.hash, i = h.indexOf("?");
+  if (h.indexOf("#calc") !== 0 || i < 0) return false;
+  const p = new URLSearchParams(h.slice(i + 1));
+  if (MODE !== "one") setMode("one");
+  Object.keys(LINK).forEach((k) => { if (k !== "old" && p.has(k)) $(LINK[k]).value = p.get(k); });
+  syncForm();
+  if (p.has("old")) $("old").value = p.get("old");
+  Object.keys(OV).forEach((k) => delete OV[k]);
+  (p.get("ov") || "").split(";").filter(Boolean).forEach((kv) => { const j = kv.lastIndexOf("="); const v = +kv.slice(j + 1); if (j > 0 && isFinite(v)) OV[kv.slice(0, j)] = v; });
+  return true;
+}
+
+/* ---------- controls ---------- */
+function fillSelect(sel, items, value) {
+  sel.innerHTML = items.map((it) => '<option value="' + esc(it[0]) + '">' + esc(it[1]) + "</option>").join("");
+  sel.value = value;
+}
+function syncForm() {
+  const iso = $("country").value, cur = $("cur").value, out = $("out").value;
+  const c = CTRY[iso];
+  const keep = $("old").value;
+  if ($("old").dataset.iso !== iso) {
+    fillSelect($("old"), [["", c.cur + ", the unit of the data"]].concat((c.old || []).map((o) =>
+      [o.code, showCode(o.code) + ", " + o.name + (o.per ? " (" + sig(o.per, 7) + " per " + c.cur + ")" : " (at each year's rate)")])), "");
+    $("old").dataset.iso = iso;
+    if ((c.old || []).some((o) => o.code === keep)) $("old").value = keep;
+  }
+  $("oldBox").hidden = !(c.old && cur === "LCU" && MODE === "one");
+  $("lcuBox").hidden = out !== "LCU";
+  const usesPPP = out === "INT" || cur === "INT" || (out === "LCU" && $("basis").value === "ppp" && $("tcountry").value !== iso);
+  const usesFX = out === "USD" || cur === "USD" || (out === "LCU" && $("basis").value === "fx" && $("tcountry").value !== iso);
+  $("pppBox").hidden = !usesPPP;
+  $("fxBox").hidden = !usesFX && MODE === "one";
+  $("shareOut").textContent = $("share").value + "%";
+  PROJ.how = $("projYears").value === "weo" ? "weo" : +$("projYears").value; PROJ.fx = $("projFx").value;
+  const sp = (s) => { const x = span(s, iso); return x ? x[0] + "–" + x[1] : "none"; };
+  $("avail").textContent = nameOf(iso) + " (" + curOf(iso) + ") data: deflator " + sp("gdpd_l") + " · CPI " + sp("cpi") +
+    " · exchange rate " + sp("fx") + " · PPP " + sp("ppp") + (DATA.series.ppp_oecd[iso] ? " · OECD PPP " + sp("ppp_oecd") : "") +
+    ". Later years are projected.";
+}
+let MODE = "one";
+function render() {
+  syncForm();
+  if (MODE === "one") renderOne(); else renderList();
+}
+function setMode(m) {
+  MODE = m;
+  $("modeOne").setAttribute("aria-selected", m === "one");
+  $("modeList").setAttribute("aria-selected", m === "list");
+  $("oneFields").hidden = m !== "one"; $("listFields").hidden = m !== "list";
+  $("oneOut").hidden = m !== "one"; $("listOut").hidden = m !== "list";
+  render();
+}
+function showPage() {
+  const guide = location.hash === "#guide" || location.hash.indexOf("#g-") === 0;
+  $("pageCalc").hidden = guide; $("pageGuide").hidden = !guide;
+  $("navCalc").setAttribute("aria-current", guide ? "false" : "page");
+  $("navGuide").setAttribute("aria-current", guide ? "page" : "false");
+  if (guide && location.hash.indexOf("#g-") === 0) { const t = document.querySelector(location.hash); if (t) t.scrollIntoView(); }
+  else if (!guide && location.hash.indexOf("?") < 0) window.scrollTo(0, 0);
+}
+function copyText(text, msgEl, done) {
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    let okc = false;
+    try { okc = document.execCommand("copy"); } catch (e) { okc = false; }
+    document.body.removeChild(ta);
+    msgEl.textContent = okc ? done : "Copy was blocked. Select the text and press Ctrl+C.";
+  };
+  try { navigator.clipboard.writeText(text).then(() => { msgEl.textContent = done; }, fallback); } catch (e) { fallback(); }
+}
+const PAPER = () => {
+  // Turner et al. (2019), Figures 1 and 2. Keep the World Bank 2006 index levels and set 2016 so the ratios equal
+  // the paper's factors; other years of the same series stay on the World Bank scale.
+  OV["fx:VNM:2006"] = 15994.25; OV["fx:VNM:2016"] = 21935;
+  OV["gdpd_l:VNM:2016"] = +(raw("gdpd_l", "VNM", 2006) * 2.360037).toPrecision(8);   // paper: × 2.36 (VND 2,360,037)
+  OV["gdpd_l:USA:2016"] = +(raw("gdpd_l", "USA", 2006) * 1.1684).toPrecision(8);     // paper: × 1.17 (US$ 116.84 from US$ 100)
+};
+function loadExample(name) {
+  Object.keys(OV).forEach((k) => delete OV[k]);
+  const set = (id, v) => { $(id).value = v; };
+  setMode("one");
+  set("measure", "gdpd_l"); set("fxSrc", "fx"); set("share", "20"); set("old", ""); set("dec", "auto");
+  if (name === "paper" || name === "usd") {
+    set("cost", name === "paper" ? "1,000,000" : "100"); set("cur", name === "paper" ? "LCU" : "USD");
+    set("country", "VNM"); set("y0", "2006"); set("y1", "2016"); set("out", "USD"); set("wordM", "3");
+    PAPER();
+  } else if (name === "borrow") {
+    set("cost", "1,200"); set("cur", "LCU"); set("country", "GBR"); set("y0", "2015"); set("y1", "2024");
+    set("out", "LCU"); set("tcountry", "IND"); set("basis", "fx"); set("wordM", "2");
+  } else if (name === "future") {
+    set("cost", "5,000"); set("cur", "LCU"); set("country", "IND"); set("y0", "2022"); set("y1", "2032");
+    set("out", "LCU"); set("tcountry", "IND"); set("projYears", "weo"); set("wordM", "2");
+  } else if (name === "review") {
+    set("cost", "1,000,000"); set("cur", "LCU"); set("country", "VNM"); set("y0", "2006"); set("y1", "2024");
+    set("out", "INT"); set("pppSrc", "ppp"); set("wordM", "2");
+  }
+  if (location.hash !== "#calc") location.hash = "#calc"; else showPage();
+  render();
+}
+
+function init() {
+  const years = [];
+  for (let y = YEAR_END; y >= YMIN; y--) years.push([y, y]);
+  const countries = BYNAME.map((c) => [c.iso, c.name]);
+  fillSelect($("country"), countries, "VNM");
+  fillSelect($("tcountry"), countries, "IND");
+  fillSelect($("y0"), years, 2006);
+  fillSelect($("y1"), years, 2016);
+  $("list").value = EXAMPLE_LIST;
+  $("stamp").textContent = "World Bank WDI " + DATA.meta.wdiText + " · IMF WEO " + DATA.meta.weo;
+  $("ver").textContent = "v" + VERSION;
+  const cnt = (s) => Object.keys(DATA.series[s]).length;
+  const rng = (s) => { let a = 9999, b = 0; Object.keys(DATA.series[s]).forEach((iso) => { const x = span(s, iso); if (x) { a = Math.min(a, x[0]); b = Math.max(b, x[1]); } }); return a + "–" + b; };
+  const WB = "https://data.worldbank.org/indicator/";
+  const SRC = [
+    ["World Bank. GDP deflator, linked series (base year varies by country), NY.GDP.DEFL.ZS.AD. Removes the jumps caused by national-accounts rebasing; years before the linked series starts follow the growth of NY.GDP.DEFL.ZS.", WB + "NY.GDP.DEFL.ZS.AD", "gdpd_l"],
+    ["World Bank. GDP deflator (base year varies by country), NY.GDP.DEFL.ZS. Offered as the standard series; rebasing breaks are flagged.", WB + "NY.GDP.DEFL.ZS", "gdpd"],
+    ["World Bank. Consumer price index (2010 = 100), FP.CPI.TOTL.", WB + "FP.CPI.TOTL", "cpi"],
+    ["World Bank. Official exchange rate (LCU per US$, period average), PA.NUS.FCRF. Re-expressed in today's currency unit where the World Bank publishes it in an older one (euro changeovers, Bulgaria, Croatia, Venezuela).", WB + "PA.NUS.FCRF", "fx"],
+    ["World Bank. DEC alternative conversion factor (LCU per US$), PA.NUS.ATLS. Used where the official rate was not the rate money changed hands at.", WB + "PA.NUS.ATLS", "fx_alt"],
+    ["World Bank. PPP conversion factor, GDP (LCU per international $), PA.NUS.PPP, from the International Comparison Program (ICP 2021 benchmark; other years extrapolated by the World Bank).", WB + "PA.NUS.PPP", "ppp"],
+    ["World Bank. GDP (current LCU), NY.GDP.MKTP.CN. Used only to check that an amount is plausible (more than 10% of GDP is flagged).", WB + "NY.GDP.MKTP.CN", "gdp"],
+    ["OECD. Annual purchasing power parities and exchange rates, PPP for GDP (PPP_B1GQ). OECD Data Explorer.", "https://data-explorer.oecd.org/", "ppp_oecd"],
+    ["IMF. World Economic Outlook (" + DATA.meta.weo + "), inflation, average consumer prices (PCPIPCH), forecasts to " + LAST.weo + ". Used only for years after the World Bank data.", "https://www.imf.org/external/datamapper/PCPIPCH", "weo"],
+  ];
+  $("dataSources").innerHTML = SRC.map((s) => "<li>" + esc(s[0]) + " " + cnt(s[2]) + " economies, " + rng(s[2]) + ". Licence CC BY 4.0" + (s[2] === "weo" ? " (IMF terms of use)" : "") + ". <a href=\"" + esc(s[1]) + "\">" +
+    esc(s[1].replace(/^https:\/\//, "").replace(/\?.*$/, "")) + "</a>.</li>").join("") +
+    "<li>Downloaded from the World Bank and IMF APIs on " + esc(DATA.meta.retrievedText) + " by <span class=\"mono\">build/fetch_data.py</span>; the raw files, the currency-history table and the build scripts are in the <a href=\"" + REPO + "\">GitHub repository</a>. " +
+    "The <a href=\"" + REPO + "/blob/main/DATA_QUALITY.md\">data-quality report</a> lists unit conversions, deflator breaks, official-vs-alternative rate gaps and stale series. Values after each series' last year are projections, not data.</li>";
+
+  $("form").addEventListener("submit", (e) => e.preventDefault());
+  ["cost", "list"].forEach((id) => $(id).addEventListener("input", render));
+  ["cur", "old", "country", "y0", "y1", "out", "tcountry", "basis", "measure", "fxSrc", "pppSrc", "share", "projYears", "projFx", "dec", "fy", "wordM"]
+    .forEach((id) => $(id).addEventListener("input", render));
+  $("listMap").addEventListener("change", (e) => {
+    const s = e.target.closest("select[data-f]");
+    if (!s) return;
+    LISTMAP = Object.assign({}, LIST.map, LISTMAP || {});
+    LISTMAP[s.dataset.f] = +s.value;
+    renderList();
+  });
+  $("modeOne").addEventListener("click", () => setMode("one"));
+  $("modeList").addEventListener("click", () => setMode("list"));
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("button.info");
+    if (b) {
+      const box = $(b.dataset.i);
+      if (box) { box.hidden = !box.hidden; b.setAttribute("aria-expanded", String(!box.hidden)); }
+      return;
+    }
+    const ex = e.target.closest("[data-example]");
+    if (ex) loadExample(ex.dataset.example);
+  });
+  document.querySelectorAll("button.info").forEach((b) => { b.setAttribute("aria-expanded", "false"); b.setAttribute("aria-controls", b.dataset.i); b.title = "What is this?"; });
+  $("vals").addEventListener("change", (e) => {
+    const t = e.target;
+    if (!t.matches("input.ov")) return;
+    const v = parseNum(t.value);
+    if (t.value.trim() === "" || v == null) delete OV[t.dataset.k]; else OV[t.dataset.k] = v;
+    renderOne();
+  });
+  $("projTable").addEventListener("change", (e) => {
+    const t = e.target;
+    if (!t.matches("input.ov")) return;
+    const v = parseNum(t.value);
+    if (t.value.trim() === "" || v == null) delete OV[t.dataset.g]; else OV[t.dataset.g] = v / 100;
+    renderOne();
+  });
+  $("resetBtn").addEventListener("click", () => { Object.keys(OV).forEach((k) => delete OV[k]); renderOne(); });
+  $("copyWord").addEventListener("click", () => copyText($("wording").textContent, $("copyMsg"), "Copied"));
+  $("copyLink").addEventListener("click", () => {
+    const h = linkHash();
+    try { history.replaceState(null, "", h); } catch (e) { /* file:// in some browsers */ }
+    copyText(location.href.split("#")[0] + h, $("copyMsg"), "Link copied: it reopens this calculation");
+  });
+  $("copyList").addEventListener("click", () => copyText(listAsRows().map((r) => r.join("\t")).join("\n"), $("listMsg"), "Copied. Paste into Excel."));
+  let framed = false;
+  try { framed = window.self !== window.top; } catch (e) { framed = true; }
+  if (framed) {   // embedded viewers block downloads, so hide the download controls there
+    $("dlList").hidden = true;
+    document.querySelectorAll(".xl-link").forEach((el) => { el.hidden = true; });
+  }
+  $("dlList").addEventListener("click", () => {
+    const csv = listAsRows().map((r) => r.map((c) => '"' + String(c == null ? "" : c).replace(/"/g, '""') + '"').join(",")).join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" }));
+    a.download = "converted_costs.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    $("listMsg").textContent = "Saved converted_costs.csv";
+  });
+  window.addEventListener("hashchange", () => { if (applyHash()) render(); showPage(); });
+  applyHash();
+  showPage();
+  render();
+}
+const dText = (d) => new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+DATA.meta.wdiText = dText(DATA.meta.wdi_updated);
+DATA.meta.retrievedText = dText(DATA.meta.wdi_retrieved);
+const API = { compute: compute, get: get, raw: raw, span: span, OV: OV, PROJ: PROJ, PROJ_LOG: PROJ_LOG, trend: trend, checks: checks, band: band,
+              parseAmount: parseAmount, readCurrency: readCurrency, readYear: readYear, findCountry: findCountry, guessMap: guessMap,
+              convertList: convertList, num: num, LAST: LAST, VERSION: VERSION, DATA: DATA };
+if (typeof window !== "undefined") window.HCC = API;   // for checking results from the console and the tests
+if (typeof globalThis !== "undefined") globalThis.HCC = API;
+if (HAS_DOM) init();
+})();
+</script>

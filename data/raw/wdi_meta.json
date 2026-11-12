@@ -1,0 +1,51 @@
+{
+ "retrieved": "2026-11-12",
+ "source": "World Bank, World Development Indicators (API v2, source 2)",
+ "series": {
+  "NY.GDP.DEFL.ZS": {
+   "label": "GDP deflator (base year varies by country)",
+   "lastupdated": "2026-10-08",
+   "values": 11582
+  },
+  "NY.GDP.DEFL.ZS.AD": {
+   "label": "GDP deflator, linked series (base year varies by country)",
+   "lastupdated": "2026-10-08",
+   "values": 7316
+  },
+  "FP.CPI.TOTL": {
+   "label": "Consumer price index (2010 = 100)",
+   "lastupdated": "2026-10-08",
+   "values": 9284
+  },
+  "PA.NUS.FCRF": {
+   "label": "Official exchange rate (LCU per US$, period average)",
+   "lastupdated": "2026-10-08",
+   "values": 12640
+  },
+  "PA.NUS.ATLS": {
+   "label": "DEC alternative conversion factor (LCU per US$)",
+   "lastupdated": "2026-10-08",
+   "values": 12592
+  },
+  "PA.NUS.PPP": {
+   "label": "PPP conversion factor, GDP (LCU per international $)",
+   "lastupdated": "2026-10-08",
+   "values": 7043
+  },
+  "NY.GDP.MKTP.CN": {
+   "label": "GDP (current LCU)",
+   "lastupdated": "2026-11-11",
+   "values": 11866
+  },
+  "NY.GDP.MKTP.CD": {
+   "label": "GDP (current US$)",
+   "lastupdated": "2026-10-08",
+   "values": 14547
+  },
+  "NY.GDP.MKTP.PP.CD": {
+   "label": "GDP, PPP (current international $)",
+   "lastupdated": "2026-10-08",
+   "values": 8604
+  }
+ }
+}
