@@ -1,428 +1,407 @@
 <title>Health Cost Converter</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/*__FONTS__*/
-/* Layout: a compact two-column worksheet on white. Paired inputs on the left; on the right, three result tiles,
-   then each method's chain of steps read left to right like the figures in Turner et al.; one column below 900px.
-   Colour: white ground, banknote inks. Method 1 = steel blue (tradable, US prices), Method 2 = copper (local prices),
-   Method 3 = intaglio violet (the mix of both), which is also the page accent. */
+/* Layout after the CCEMG–EPPI Cost Converter: a green title bar, numbered steps with green label cells,
+   a plain results table with a green header, footnotes, then "Information for users". Projected values in red type. */
 :root {
+  --green: #99ff99;
+  --green-soft: #d6ffd6;
   --bg: #ffffff;
-  --surface: #ffffff;
-  --field: #ffffff;
-  --tint: #f7f8fb;
-  --chip: #eef0f6;
-  --ink: #1a2330;
-  --muted: #5f6b7a;
-  --line: #e3e7ee;
-  --accent: #4b3aa3;
-  --m1: #24609f;
-  --m2: #a2581b;
-  --m3: #4b3aa3;
-  --proj: #0f6b62;
-  --warn-bg: #fff8e9;
-  --warn: #7a4a00;
-  --bad-bg: #fff1f1;
-  --bad: #9b1f26;
-  --display: "Spectral", Georgia, "Times New Roman", serif;
-  --body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, Consolas, "Courier New", monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f151c; --surface: #151e28; --field: #121a23; --tint: #18222d; --chip: #212c38; --ink: #e4eaf0; --muted: #9babbb;
-    --line: #2a3643; --accent: #a99cf0; --m1: #80b3ec; --m2: #e5a06a; --m3: #a99cf0; --proj: #6fd1c4;
-    --warn-bg: #33270f; --warn: #f2c86e; --bad-bg: #3a1719; --bad: #f2959a; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f151c; --surface: #151e28; --field: #121a23; --tint: #18222d; --chip: #212c38; --ink: #e4eaf0; --muted: #9babbb;
-  --line: #2a3643; --accent: #a99cf0; --m1: #80b3ec; --m2: #e5a06a; --m3: #a99cf0; --proj: #6fd1c4;
-  --warn-bg: #33270f; --warn: #f2c86e; --bad-bg: #3a1719; --bad: #f2959a; color-scheme: dark;
+  --tint: #f5f5f5;
+  --ink: #000000;
+  --muted: #555555;
+  --line: #c8c8c8;
+  --accent: #0645ad;
+  --head: #2f5496;
+  --m1: #1d4f91;
+  --m2: #9a4a0b;
+  --m3: #5b2a86;
+  --proj: #c00000;
+  --warn-bg: #fff6dc;
+  --warn: #6b4500;
+  --bad-bg: #ffecec;
+  --bad: #a00000;
+  --body: "Segoe UI", Tahoma, Arial, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
 }
 [hidden] { display: none !important; }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 var(--body); }
 .wrap {
-  max-width: 1440px; margin: 0 auto;
-  padding-block: 12px 32px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: grid; gap: 14px;
+  max-width: 1400px; margin: 0 auto;
+  padding-block: 8px 32px;
+  padding-left: max(8px, env(safe-area-inset-left, 0px));
+  padding-right: max(8px, env(safe-area-inset-right, 0px));
 }
-h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.2; }
-h1 { font-size: 1.45rem; letter-spacing: -0.01em; }
-h2 { font-size: 1.08rem; }
-h3 { font-size: 1rem; }
+h1, h2, h3 { margin: 0; line-height: 1.25; }
+h1 { font-size: 1.75rem; font-weight: 700; font-style: italic; }
+h2 { font-size: 1.2rem; font-weight: 400; color: var(--head); }
+h3 { font-size: 1rem; font-weight: 400; color: var(--head); }
 p { margin: 0; }
-.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--mono); }
 a { color: var(--accent); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-/* Header: name, page tabs and data date on one line */
-.top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
-.brand { display: grid; gap: 1px; flex: 1 1 360px; min-width: 0; }
-.brand p { color: var(--muted); font-size: 0.8rem; }
-.pages { display: flex; flex-wrap: wrap; gap: 4px 2px; }
-.pages a { padding: 5px 11px; text-decoration: none; color: var(--muted); font-weight: 500; border-radius: 5px; font-size: 0.88rem; white-space: nowrap; }
-.pages a:hover { background: var(--tint); }
-.pages a[aria-current="page"] { color: var(--accent); background: var(--chip); }
-.pages a.dl { color: var(--accent); border: 1px solid var(--line); }
+/* Title bar */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 20px;
+  background: var(--green); padding: 8px 10px; margin-bottom: 14px; }
+.pages { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.pages a { color: var(--ink); font-weight: 600; white-space: nowrap; }
+.pages a[aria-current="page"] { text-decoration: none; }
 .pages a.dl::before { content: "↓ "; }
-.stamp { font-size: 0.75rem; color: var(--muted); }
-.page { display: grid; gap: 18px; min-width: 0; }
+.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0; }
+.page > *, form > *, .steps > *, .out > *, .how > * { min-width: 0; }
+.intro { display: grid; gap: 12px; }
 
-.grid { display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); gap: 18px; align-items: start; }
-@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
-
-/* Form */
-.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 12px; }
-@media (min-width: 901px) {
-  .panel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 10px); max-height: calc(100vh - 20px); overflow-y: auto; }
-}
-fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 4px; min-width: 0; }
-fieldset + fieldset { border-top: 1px solid var(--line); padding-top: 10px; }
-legend { font-family: var(--display); font-weight: 600; font-size: 0.98rem; padding: 0; margin-bottom: 2px; }
-label { font-size: 0.8rem; font-weight: 500; color: var(--muted); }
-.lab { display: flex; align-items: center; gap: 6px; margin-top: 3px; min-width: 0; }
-.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 10px; row-gap: 4px; }
-.pair.wide1 { grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); }
-.c1 { grid-column: 1; } .c2 { grid-column: 2; } .span { grid-column: 1 / -1; }
+/* Steps */
+form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.seg { display: inline-flex; justify-self: start; border: 1px solid var(--line); }
+.seg button { font: inherit; border: 0; background: #fff; color: var(--accent); padding: 2px 12px; cursor: pointer; text-decoration: underline; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-selected="true"] { background: var(--green); color: var(--ink); text-decoration: none; font-weight: 600; }
+.steps { counter-reset: step; display: grid; gap: 3px; }
+.step { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 0 6px; align-items: center; }
+.step.num { counter-increment: step; }
+.step.num .s-lab > :first-child::before { content: counter(step) ". "; }
+.s-lab { background: var(--green); padding: 1px 4px; display: flex; align-items: center; gap: 6px; min-height: 24px; }
+.s-lab label, .s-lab span { flex: 1; color: var(--ink); }
+.s-in { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
+.s-in label { color: var(--ink); }
+.step .info-text { grid-column: 1 / -1; margin: 2px 0 4px; }
+.further { margin-top: 10px; font-weight: 600; }
+.old { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
 input[type="text"], select, textarea {
-  width: 100%; font: inherit; font-size: 0.86rem; color: var(--ink); background: var(--field);
-  border: 1px solid var(--line); border-radius: 5px; padding: 5px 8px; min-width: 0;
+  font: inherit; font-size: 0.93rem; color: var(--ink); background: #fff;
+  border: 1px solid #767676; border-radius: 2px; padding: 1px 4px; min-width: 0; max-width: 100%;
 }
-input[type="text"]:hover, select:hover, textarea:hover { border-color: var(--muted); }
-textarea { font-family: var(--mono); font-size: 0.8rem; line-height: 1.5; resize: vertical; white-space: pre; overflow-x: auto; }
-#cost { font-family: var(--mono); }
-.share-row { display: grid; grid-template-columns: auto minmax(60px, 1fr) 3.2em; align-items: center; gap: 8px; margin-top: 3px; }
-.share-row output { font-family: var(--mono); font-size: 0.82rem; text-align: right; }
-input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; }
-.check { display: flex; gap: 7px; align-items: flex-start; color: var(--ink); font-weight: 400; font-size: 0.8rem; }
-.check input { margin-top: 2px; accent-color: var(--accent); }
-.hint, .avail { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
-.sublegend { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 6px; }
+#cost { width: 12em; }
+select.wide { width: 22em; }
+textarea { width: 100%; font-family: var(--mono); font-size: 0.85rem; resize: vertical; white-space: pre; overflow-x: auto; }
+.share-row input[type="range"] { width: 14em; accent-color: #2a8a2a; margin: 0; }
+.share-row output { font-family: var(--mono); }
+.hint, .avail { font-size: 0.85rem; color: var(--muted); }
 .info {
-  width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); background: transparent;
-  font: italic 600 13px/1 var(--display); cursor: pointer; padding: 0; display: inline-grid; place-items: center; flex: none;
+  width: 20px; height: 20px; border-radius: 50%; border: 1px solid #555; color: #333; background: #fff;
+  font: italic 700 12px/1 Georgia, serif; cursor: pointer; padding: 0; display: inline-grid; place-items: center; flex: none;
 }
-.info:hover { background: var(--chip); }
-.info[aria-expanded="true"] { background: var(--accent); color: var(--surface); }
-.info-text { font-size: 0.82rem; background: var(--tint); border: 1px solid var(--line); border-radius: 5px; padding: 7px 9px; color: var(--ink); line-height: 1.45; }
+.info:hover, .info[aria-expanded="true"] { background: #333; color: #fff; }
+.info-text { font-size: 0.88rem; background: #fafafa; border: 1px solid var(--line); padding: 6px 9px; }
 .info-text p + p { margin-top: 4px; }
-.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--tint); border: 1px solid var(--line); border-radius: 6px; padding: 2px; gap: 2px; }
-.seg button { font: inherit; font-size: 0.82rem; font-weight: 500; border: 0; background: transparent; color: var(--muted); padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-.seg button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(20 30 50 / 0.12); }
-.btn { font: inherit; font-size: 0.8rem; font-weight: 500; cursor: pointer; border-radius: 5px; padding: 5px 10px;
-  border: 1px solid var(--accent); background: var(--accent); color: var(--surface); text-decoration: none; display: inline-block; }
-.btn.ghost { background: transparent; color: var(--accent); }
-.btn:hover { filter: brightness(1.08); }
+.btn { font: inherit; font-size: 0.88rem; cursor: pointer; padding: 1px 10px; border: 1px solid #767676; background: #efefef; color: var(--ink); border-radius: 2px; }
+.btn:hover { background: #e2e2e2; }
+.linkbtn { font: inherit; border: 0; background: none; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; }
 .actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.map { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 4px 10px; width: 100%; }
+.map label { display: grid; gap: 2px; }
+.read { font-size: 0.85rem; color: var(--muted); font-family: var(--mono); }
+.read.bad { color: var(--bad); font-family: var(--body); }
 
 /* Results */
-.out { display: grid; gap: 16px; min-width: 0; container-type: inline-size; }
-.alerts { display: grid; gap: 6px; }
+.out { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
+.res-h { font-size: 1rem; font-weight: 700; color: var(--ink); }
+#oneOut > .res-h { margin-bottom: -10px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; padding: 2px 6px; vertical-align: top; }
+th { font-weight: 400; background: var(--green); }
+.res thead th { white-space: nowrap; }
+.res thead th small { display: block; font-size: 0.78rem; color: var(--muted); }
+.res tbody th[scope="row"], .res tr.final td:first-child { background: var(--green); }
+.res tr.sens td:first-child { background: var(--green-soft); }
+.res tbody td { border-bottom: 1px solid #eee; }
+.res th, .res td { vertical-align: middle; }
+.res .bar { color: var(--muted); }
+.res tr.final td:last-child { font-size: 1.05rem; }
+.res td.n:last-child { text-align: right; white-space: nowrap; }
+.foot { font-size: 0.9rem; display: grid; }
+.alerts { display: grid; gap: 4px; }
 .alerts:empty { display: none; }
-.alert { border-radius: 6px; padding: 6px 10px; font-size: 0.8rem; background: var(--warn-bg); color: var(--warn); }
-.alert.bad { background: var(--bad-bg); color: var(--bad); }
-.alert.note { background: var(--tint); color: var(--ink); border: 1px solid var(--line); }
-.mk { width: 10px; height: 10px; border-radius: 2px; background: var(--mc); flex: none; display: inline-block; }
+.alert { padding: 4px 8px; font-size: 0.88rem; background: var(--warn-bg); color: var(--warn); border-left: 3px solid #e0a800; }
+.alert.bad { background: var(--bad-bg); color: var(--bad); border-left-color: var(--bad); }
+.alert.note { background: #f6f6f6; color: var(--ink); border-left-color: #999; }
+.which, .spread { font-size: 0.9rem; }
+.which:empty, .spread:empty { display: none; }
+.band { font-size: 0.8rem; color: var(--proj); }
+.pj { color: var(--proj); }
+.miss { color: var(--bad); }
+.mk { width: 10px; height: 10px; background: var(--mc); flex: none; display: inline-block; }
 .m1 { --mc: var(--m1); } .m2 { --mc: var(--m2); } .m3 { --mc: var(--m3); }
 .m1 .mk, .mk.m1 { border-radius: 50%; }
-.m3 .mk, .mk.m3 { transform: rotate(45deg) scale(0.85); border-radius: 1px; }
-.m2 .t-bar span { background-image: repeating-linear-gradient(135deg, transparent 0 3px, rgb(255 255 255 / 0.45) 3px 5px); }
-.m3 .t-bar span { background-image: radial-gradient(rgb(255 255 255 / 0.55) 1px, transparent 1.4px); background-size: 4px 4px; }
-.role { font-family: var(--body); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; margin-left: auto;
-  border-radius: 4px; padding: 1px 6px; border: 1px solid var(--line); color: var(--muted); }
-.role.main { color: var(--surface); background: var(--mc); border-color: var(--mc); }
-.tile.main { border-color: var(--mc); box-shadow: inset 0 0 0 1px var(--mc); }
-.which { font-size: 0.82rem; color: var(--muted); }
-.band { font-size: 0.75rem; color: var(--proj); }
-.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-@container (max-width: 520px) { .tiles { grid-template-columns: minmax(0, 1fr); } }
-.tile { border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px 10px; display: grid; gap: 2px; min-width: 0; background: var(--surface); }
-.t-top { display: flex; align-items: center; gap: 7px; font-family: var(--display); font-weight: 600; font-size: 0.98rem; }
-.t-sub { font-size: 0.78rem; color: var(--muted); line-height: 1.35; }
-.big { font-family: var(--mono); font-size: 1.35rem; font-weight: 500; color: var(--mc); line-height: 1.25; overflow-wrap: anywhere; margin-top: 3px; }
-.t-bar { height: 5px; background: var(--chip); border-radius: 3px; overflow: hidden; margin-top: 4px; }
-.t-bar span { display: block; height: 100%; background: var(--mc); border-radius: 3px; }
-.big-sub { font-size: 0.75rem; color: var(--muted); }
-.spread { font-size: 0.8rem; color: var(--muted); margin-top: -6px; }
-.ver { font-size: 0.75rem; color: var(--accent); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; margin-left: 6px; font-family: var(--mono); vertical-align: middle; }
-.map { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 4px 10px; }
-.map label { display: grid; gap: 2px; }
-.read { font-size: 0.75rem; color: var(--muted); font-family: var(--mono); }
-.read.bad { color: var(--bad); font-family: var(--body); }
-.pj { color: var(--proj); font-weight: 600; }
+.m3 .mk, .mk.m3 { transform: rotate(45deg) scale(0.85); }
 
 /* Step chains */
-.flows { border: 1px solid var(--line); border-radius: 8px; padding: 2px 12px; }
-.flow { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 4px 10px; padding: 8px 0; align-items: start; }
+.flows { border: 1px solid var(--line); padding: 2px 10px; }
+.flow { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 4px 10px; padding: 6px 0; align-items: start; }
 .flow + .flow { border-top: 1px solid var(--line); }
-@container (max-width: 560px) { .flow { grid-template-columns: minmax(0, 1fr); } }
-.fl-lab { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.82rem; padding-top: 4px; }
+@media (max-width: 560px) { .flow { grid-template-columns: minmax(0, 1fr); } }
+.fl-lab { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.88rem; padding-top: 3px; }
 .fl-body { display: grid; gap: 4px; min-width: 0; }
-.fl-tag { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.fl-tag { font-size: 0.8rem; color: var(--muted); }
 .chain { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: stretch; gap: 4px 2px; }
-.chain li { display: grid; align-content: center; gap: 0; min-width: 0; }
-.node { border: 1px solid var(--line); border-radius: 5px; padding: 3px 8px; background: var(--tint); }
-.node b { font-family: var(--mono); font-weight: 500; font-size: 0.8rem; white-space: nowrap; }
-.node small, .op small { font-size: 0.75rem; color: var(--muted); line-height: 1.25; }
+.chain li { display: grid; align-content: center; min-width: 0; }
+.node { border: 1px solid var(--line); padding: 2px 8px; background: var(--tint); }
+.node b { font-weight: 600; font-size: 0.88rem; white-space: nowrap; }
+.node small, .op small { font-size: 0.78rem; color: var(--muted); line-height: 1.25; }
 .op { padding: 0 8px 0 20px; position: relative; max-width: 15em; }
-.op::before { content: "→"; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); color: var(--mc); font-size: 0.9rem; }
-.op b { font-family: var(--mono); font-weight: 500; font-size: 0.78rem; color: var(--mc); white-space: nowrap; }
-.fl-sum { font-family: var(--mono); font-size: 0.8rem; }
-.fl-sum b { color: var(--mc); font-weight: 500; }
+.op::before { content: "→"; position: absolute; left: 4px; top: 50%; transform: translateY(-50%); color: var(--mc); }
+.op b { font-weight: 600; font-size: 0.85rem; color: var(--mc); white-space: nowrap; }
+.fl-sum { font-size: 0.88rem; }
 
 .sec { display: grid; gap: 6px; min-width: 0; align-content: start; }
 .sec > * { min-width: 0; }
 .sec-head { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
 .sec-head .spacer { flex: 1; }
 .duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-@container (max-width: 760px) { .duo { grid-template-columns: minmax(0, 1fr); } }
-.tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
-table { border-collapse: collapse; width: 100%; font-size: 0.8rem; }
-th, td { text-align: left; padding: 4px 9px; border-bottom: 1px solid var(--line); vertical-align: middle; }
-tr:last-child td { border-bottom: 0; }
-th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; background: var(--tint); white-space: nowrap; }
-td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
-td input.ov { width: 9em; font-family: var(--mono); text-align: right; padding: 2px 6px; font-size: 0.78rem; }
-td input.ov.rate { width: 5.5em; }
-td input.ov.own { border-color: var(--accent); background: var(--chip); }
-td input.ov.projected { border-style: dashed; border-color: var(--proj); }
-.src { font-size: 0.75rem; color: var(--muted); }
+@media (max-width: 860px) { .duo { grid-template-columns: minmax(0, 1fr); } }
+.tablebox { overflow-x: auto; }
+td.n, th.n { font-variant-numeric: tabular-nums; }
+td input.ov { width: 9em; text-align: right; font-size: 0.85rem; }
+td input.ov.own { border-color: var(--accent); background: #eef3ff; }
+td input.ov.projected { color: var(--proj); border-style: dashed; border-color: var(--proj); }
+.src { font-size: 0.82rem; color: var(--muted); }
 .src.own { color: var(--accent); font-weight: 600; }
-.src.proj { color: var(--proj); font-weight: 600; }
+.src.proj { color: var(--proj); }
 .src.miss { color: var(--bad); font-weight: 600; }
-.row-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.wording { border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font-size: 0.82rem; line-height: 1.5; background: var(--tint); }
-.small-select { width: auto; }
-.flag { font-size: 0.75rem; color: var(--warn); }
+.sec table tbody td { border-bottom: 1px solid #eee; }
+.wording { border: 1px solid var(--line); padding: 8px 10px; font-size: 0.9rem; background: var(--tint); }
+.flag { font-size: 0.82rem; color: var(--warn); }
 .flag.bad { color: var(--bad); }
 .flag.pj { color: var(--proj); }
 
-/* How it works and sources (bottom of the calculator) */
-.how { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 10px; }
-.how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px 26px; }
-@media (min-width: 1100px) { #how .how-grid { grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 640px) and (max-width: 1099px) { #how .how-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.how-grid > div { display: grid; gap: 5px; align-content: start; min-width: 0; }
-.how p, .how li { font-size: 0.8rem; }
-.how ul { margin: 0; padding-left: 1.1em; display: grid; gap: 3px; }
-.formula { font-family: var(--mono); font-size: 0.75rem; background: var(--tint); border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; white-space: pre-wrap; line-height: 1.65; }
-.sources ol { margin: 0; padding-left: 1.4em; display: grid; gap: 4px; font-size: 0.78rem; }
-.sources li { overflow-wrap: anywhere; }
+/* Information for users */
+.how { display: grid; gap: 12px; margin-top: 18px; }
+.how h3 { margin-top: 4px; }
+.how ol, .how ul { margin: 0; padding-left: 1.6em; display: grid; gap: 4px; }
+.refs li { overflow-wrap: anywhere; }
+.formula { font-family: var(--mono); font-size: 0.85rem; background: var(--tint); border: 1px solid var(--line); padding: 6px 9px; white-space: pre-wrap; line-height: 1.6; }
 
-/* Guide: side menu and grouped sections */
+/* Guide */
 .guide-page { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; align-items: start; }
 @media (max-width: 900px) { .guide-page { grid-template-columns: minmax(0, 1fr); } }
-.toc { display: grid; gap: 1px; font-size: 0.82rem; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 10px); }
-.toc a { text-decoration: none; color: var(--muted); padding: 3px 8px; border-radius: 4px; }
-.toc a:hover { background: var(--tint); color: var(--ink); }
-.toc b { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 0 8px 4px; }
-@media (max-width: 900px) { .toc { position: static; display: flex; flex-wrap: wrap; } .toc b { width: 100%; } }
+.toc { display: grid; gap: 1px; font-size: 0.88rem; position: sticky; top: 10px; }
+.toc a { padding: 2px 6px; }
+.toc b { padding: 0 6px 4px; }
+@media (max-width: 900px) { .toc { position: static; display: flex; flex-wrap: wrap; gap: 2px 8px; } .toc b { width: 100%; } }
 .guide { display: grid; gap: 18px; min-width: 0; }
 .g-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px 26px; align-items: start; }
 .guide section { display: grid; gap: 6px; min-width: 0; scroll-margin-top: 12px; align-content: start; }
 .guide section > * { min-width: 0; }
-.guide p, .guide li { font-size: 0.86rem; max-width: 82ch; }
-.guide ul, .guide ol { margin: 0; padding-left: 1.2em; display: grid; gap: 3px; }
+.guide p, .guide li { max-width: 90ch; }
+.guide ul, .guide ol { margin: 0; padding-left: 1.4em; display: grid; gap: 3px; }
 .guide .lead { color: var(--muted); }
-.card-sec { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.guide table tbody td { border-bottom: 1px solid #eee; }
+.card-sec { border: 1px solid var(--line); padding: 8px 12px; }
 #g-method td:first-child { white-space: nowrap; }
-.expect { font-family: var(--mono); font-size: 0.78rem; background: var(--tint); border-radius: 4px; padding: 3px 7px; }
-@media (prefers-reduced-motion: no-preference) { .t-bar span { transition: width 0.25s ease; } }
-@media (max-width: 640px) {
+.expect { font-family: var(--mono); font-size: 0.85rem; background: var(--tint); padding: 2px 6px; }
+
+@media (max-width: 760px) {
+  .step { grid-template-columns: minmax(0, 1fr); }
+  .s-in { padding: 3px 0 6px; }
+  .old { margin-left: 0; }
+  select.wide { width: 100%; }
+  .res { font-size: 0.82rem; }
   #vals thead { display: none; }
-  #vals tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; padding: 6px 9px; border-bottom: 1px solid var(--line); }
+  #vals tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; padding: 6px 4px; border-bottom: 1px solid #eee; }
   #vals td { border: 0; padding: 0; white-space: normal; }
-  #vals td:first-child { grid-column: 1 / -1; font-weight: 500; }
-  #vals td.n { text-align: left; }
+  #vals td:first-child { grid-column: 1 / -1; font-weight: 600; }
 }
 @media print {
-  :root, :root[data-theme="dark"] { --bg: #fff; --surface: #fff; --field: #fff; --tint: #f6f6f6; --chip: #eee; --ink: #000; --muted: #444;
-    --line: #ccc; --accent: #3b2d8a; --m1: #1d4f84; --m2: #7f4513; --m3: #3b2d8a; --proj: #0b5149; color-scheme: light; }
-  body { font-size: 11pt; }
-  .pages, .actions, .info, .info-text, .seg, button, #resetBtn, #copyMsg, .toc, .how-grid .xl-link { display: none !important; }
-  .grid { grid-template-columns: minmax(0, 1fr); }
-  .panel { position: static; max-height: none; overflow: visible; break-inside: avoid; }
+  body { font-size: 10.5pt; }
+  .pages, .actions, .info, .info-text, .seg, button, #resetBtn, #copyMsg, .toc, #recalc, .xl-link { display: none !important; }
   .tablebox { overflow: visible; }
-  .tile, .flows, .wording, table { break-inside: avoid; }
+  .flows, .wording, table { break-inside: avoid; }
   input[type="text"], select, textarea { border: 0; padding: 0; appearance: none; -webkit-appearance: none; }
+  .top, th, .s-lab { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   a { color: inherit; }
 }
 </style>
 <!--BODY-->
 <div class="wrap">
   <header class="top">
-    <div class="brand">
-      <h1>Health Cost Converter <span class="ver" id="ver">v__VERSION__</span></h1>
-      <p>Implements the three methods of Turner et&nbsp;al. (2019), <i>Value in Health</i> 22(9):1026–1032.</p>
-    </div>
+    <h1>Health Cost Converter</h1>
     <nav class="pages" aria-label="Pages">
       <a href="#calc" id="navCalc" aria-current="page">Calculator</a>
       <a href="#guide" id="navGuide">How to use</a>
       <a href="Cost_Converter_Workings.xlsx" download class="xl-link dl">Excel workings</a>
     </nav>
-    <span class="stamp mono" id="stamp"></span>
   </header>
 
   <!-- ===================================================== CALCULATOR -->
   <div class="page" id="pageCalc">
-  <div class="grid">
-    <form id="form" class="panel" autocomplete="off">
+    <div class="intro">
+      <p>This ‘Health Cost Converter’ (<span id="ver">v__VERSION__</span>; data: <span id="stamp"></span>) is an open access web-based tool for adjusting estimates of cost expressed in one currency and price year to a specific target currency and price year. It applies the three methods of Turner et&nbsp;al. (2019), <i>Value in Health</i> 22(9):1026–1032; the default, Method 2 with PPP and the GDP deflator, is the computation of the CCEMG–EPPI Cost Converter.</p>
+      <p>Before using the tool, please read the ‘<a href="#info">Information for users</a>’, located beneath the tool on this web page, or the <a href="#guide">How to use</a> page.</p>
+      <p>To use the tool, please enter and select your data using Steps 1–6, below. The further options keep their defaults unless you change them.</p>
+    </div>
+
+    <form id="form" autocomplete="off">
       <div class="seg" role="tablist" aria-label="What to convert">
         <button type="button" role="tab" id="modeOne" aria-selected="true">One cost</button>
         <button type="button" role="tab" id="modeList" aria-selected="false">A list of costs</button>
       </div>
-      <div class="lab"><label for="dec">Decimal mark</label><button type="button" class="info" data-i="i-dec" aria-label="About Decimal mark">i</button></div>
-      <div class="info-text" id="i-dec" hidden><p><b>Automatic</b> reads 1,000,000 and 2,500.50 as written in English, and 12,5 or 1.234,56 as a decimal comma. A number such as 1,000 or 1.000 could be read either way; the calculator says how it read it. Choose <b>Comma</b> if the study writes 2.500,50, or <b>Point</b> to read every comma as a thousands separator. Currency signs (£, €, US$) and spaces are ignored.</p></div>
-      <select id="dec">
-        <option value="auto">Automatic</option>
-        <option value=".">Point: 1,234.56</option>
-        <option value=",">Comma: 1.234,56</option>
-      </select>
 
-      <fieldset id="oneFields">
-        <legend>The cost</legend>
-        <div class="pair">
-          <div class="lab c1"><label for="cost">Amount</label><button type="button" class="info" data-i="i-cost" aria-label="About Amount">i</button></div>
-          <div class="lab c2"><label for="cur">Reported in</label><button type="button" class="info" data-i="i-cur" aria-label="About Reported in">i</button></div>
-          <div class="info-text span" id="i-cost" hidden><p>The cost as the study reports it, in the currency chosen under <b>Reported in</b>. Separators are fine (1,000,000); see <b>Decimal mark</b> for 2.500,50. Unit costs and totals both work: the adjustment is a multiplication, so it scales with the amount.</p></div>
-          <div class="info-text span" id="i-cur" hidden><p><b>Local currency</b>: the money of the country where the cost was incurred. Most studies report this.</p><p><b>US$</b> or <b>I$</b>: the study already converted a local cost. The calculator first turns it back into local currency at the price-year rate, then adjusts it (Turner et&nbsp;al., Figure 4). Applying local inflation straight to a US$ figure would overstate it.</p></div>
-          <input type="text" id="cost" class="c1" inputmode="decimal" value="1,000,000">
-          <select id="cur" class="c2">
-            <option value="LCU">Local currency</option>
-            <option value="USD">US$ (study converted)</option>
-            <option value="INT">I$ (study converted)</option>
-          </select>
-        </div>
-        <div class="pair wide1">
-          <div class="lab c1"><label for="country">Country where incurred</label><button type="button" class="info" data-i="i-country" aria-label="About Country where incurred">i</button></div>
-          <div class="lab c2"><label for="y0">Price year</label><button type="button" class="info" data-i="i-y0" aria-label="About Price year">i</button></div>
-          <div class="info-text span" id="i-country" hidden><p>The setting where the resources were used and paid for. Its currency is the starting point and its inflation drives Method 2.</p><p>Borrowing a cost from another country's study? Choose that study's country here, and your own setting under <b>Output currency</b>.</p></div>
-          <div class="info-text span" id="i-y0" hidden><p>The year whose prices the cost is expressed in: the price year the study states, or else the year the costs were collected. It is usually not the publication year. For a fiscal year such as 2015/16, use the list mode, which can average the two calendar years. Years after the data are projected.</p></div>
-          <select id="country" class="c1"></select>
-          <select id="y0" class="c2"></select>
-        </div>
-        <div id="oldBox" hidden>
-          <div class="lab"><label for="old">Amount is in</label><button type="button" class="info" data-i="i-old" aria-label="About the currency unit">i</button></div>
+      <div class="steps">
+        <!-- one cost: step 1 -->
+        <div class="step num one-only">
+          <div class="s-lab"><label for="cost">Input cost estimate (value) reported in original study (e.g. 123.45)</label><button type="button" class="info" data-i="i-cost" aria-label="About the cost">i</button></div>
+          <div class="s-in">
+            <input type="text" id="cost" inputmode="decimal" value="1,000,000" aria-label="Cost">
+            <select id="cur" aria-label="Reported in">
+              <option value="LCU">in local currency</option>
+              <option value="USD">in US$ (study converted)</option>
+              <option value="INT">in I$ (study converted)</option>
+            </select>
+            <a href="#calc" id="recalc">Recalculate</a>
+            <span id="oldBox" class="old" hidden><label for="old">Amount is in *</label>
+              <select id="old"></select><button type="button" class="info" data-i="i-old" aria-label="About the currency unit">i</button></span>
+          </div>
+          <div class="info-text" id="i-cost" hidden><p>The cost as the study reports it. <b>In local currency</b>: the money of the country where the cost was incurred; most studies report this. <b>In US$</b> or <b>in I$</b>: the study already converted a local cost. The calculator first turns it back into local currency at the price-year rate, then adjusts it (Turner et&nbsp;al., Figure 4); applying local inflation straight to a US$ figure would overstate it.</p><p>Separators are fine (1,000,000); see <b>Decimal mark</b> under the further options for 2.500,50. Unit costs and totals both work: the adjustment is a multiplication. Results update as you type; <b>Recalculate</b> refreshes them.</p></div>
           <div class="info-text" id="i-old" hidden><p>All money values here are in the country's current currency unit for every year (for example euros for Germany in 1995, new leones for Sierra Leone in 2017). If the study reports an older unit (Deutsche Mark, old leones), choose it: the amount is first divided by the legal conversion rate. For dollarised economies (Ecuador, El Salvador) and economies whose accounts are kept in US$ (Liberia, West Bank and Gaza), the local currency is converted at each year's official exchange rate. The table of conversions is <span class="mono">data/currency_history.csv</span> in the repository.</p></div>
-          <select id="old"></select>
         </div>
-        <p class="avail" id="avail"></p>
-      </fieldset>
+        <!-- list: step 1 -->
+        <div class="step num list-only" hidden>
+          <div class="s-lab"><label for="list">Paste rows from Excel: Study, Amount, Country, Price year, Currency</label><button type="button" class="info" data-i="i-list" aria-label="About the list">i</button></div>
+          <div class="s-in"><textarea id="list" rows="7" spellcheck="false"></textarea></div>
+          <div class="info-text" id="i-list" hidden><p>Copy the cells from Excel and paste them here; the columns arrive separated by tabs (semicolons and commas also work). A first row with column names is recognised, so the columns can be in any order; check the matches in the next step.</p><p>Country can be a name (Viet Nam or Vietnam) or an ISO code (VNM, VN). Currency: blank or the local code (VND) for local currency; USD or I$ for amounts the study already converted; an old code such as DEM or SLL for amounts in a former currency. The other steps apply to every row.</p></div>
+        </div>
+        <div class="step num list-only" hidden>
+          <div class="s-lab"><span>Check which column holds each item</span></div>
+          <div class="s-in"><div class="map" id="listMap"></div><p class="read" id="mapNote"></p></div>
+        </div>
 
-      <fieldset id="listFields" hidden>
-        <legend>The costs</legend>
-        <div class="lab"><label for="list">Paste rows from Excel: Study, Amount, Country, Price year, Currency</label><button type="button" class="info" data-i="i-list" aria-label="About the list">i</button></div>
-        <div class="info-text" id="i-list" hidden><p>Copy the cells from Excel and paste them here; the columns arrive separated by tabs (semicolons and commas also work). A first row with column names is recognised, so the columns can be in any order; check the matches under <b>Columns</b>.</p><p>Country can be a name (Viet Nam or Vietnam) or an ISO code (VNM, VN). Currency: blank or the local code (VND) for local currency; USD or I$ for amounts the study already converted; an old code such as DEM or SLL for amounts in a former currency. The settings under <b>Convert to</b> apply to every row.</p></div>
-        <textarea id="list" rows="8" spellcheck="false"></textarea>
-        <p class="sublegend">Columns</p>
-        <div class="map" id="listMap"></div>
-        <p class="read" id="mapNote"></p>
-        <div class="lab"><label for="fy">Fiscal years (2015/16)</label><button type="button" class="info" data-i="i-fy" aria-label="About fiscal years">i</button></div>
-        <div class="info-text" id="i-fy" hidden><p>How to read a price year written as 2015/16, 2015-16 or FY2016-style ranges. <b>Average</b> converts the cost at both calendar years and averages the results; <b>First year</b> or <b>Second year</b> use one of them. A single year (2015) is always read as that calendar year.</p></div>
-        <select id="fy">
-          <option value="avg">Average of the two years</option>
-          <option value="start">First year (2015 for 2015/16)</option>
-          <option value="end">Second year (2016 for 2015/16)</option>
-          <option value="cal">Not allowed: flag the row</option>
-        </select>
-      </fieldset>
+        <div class="step num" id="pppBox">
+          <div class="s-lab"><label for="pppSrc">Select source dataset for PPP values</label><button type="button" class="info" data-i="i-ppp" aria-label="About PPP values">i</button></div>
+          <div class="s-in"><select id="pppSrc">
+            <option value="ppp">World Bank</option>
+            <option value="ppp_oecd">OECD</option>
+          </select> <span class="hint">World Bank: ICP, about 200 economies · OECD: 65 countries</span></div>
+          <div class="info-text" id="i-ppp" hidden><p><b>World Bank</b>: PPP conversion factors from the International Comparison Program (2021 benchmark), about 200 economies from 1990. A new benchmark revises every year, so a result can change when the World Bank updates the series; the calculator notes when the conversion spans a benchmark year.</p><p><b>OECD</b>: PPPs for GDP for 65 mostly high-income countries, some from the 1950s. The two differ slightly for OECD members, as the IMF and OECD options do in the CCEMG–EPPI tool.</p></div>
+        </div>
 
-      <fieldset>
-        <legend>Convert to</legend>
-        <div class="pair">
-          <div class="lab c1"><label for="y1">Base year</label><button type="button" class="info" data-i="i-y1" aria-label="About Base year">i</button></div>
-          <div class="lab c2"><label for="out">Output currency</label><button type="button" class="info" data-i="i-out" aria-label="About Output currency">i</button></div>
-          <div class="info-text span" id="i-y1" hidden><p>The year whose prices you want the result in, usually your analysis year. It can be earlier than the price year: the calculator then deflates. You can choose up to 2037; years after the last World Bank figure (2024 or 2025 for most countries) use projected values, marked in green.</p></div>
-          <div class="info-text span" id="i-out" hidden><p><b>International $</b> converts with PPP factors, so I$1 buys in each country what US$1 buys in the United States. Better for comparing resource use across countries, and the usual choice in reviews.</p><p><b>US$</b> converts at market exchange rates: widely understood, but rates can swing.</p><p><b>Local currency of a country</b>: your study setting's money, or the same country to adjust for inflation only. Turner et&nbsp;al. suggest reporting local currency next to US$ or I$.</p></div>
-          <select id="y1" class="c1"></select>
-          <select id="out" class="c2">
-            <option value="INT">International $ (PPP)</option>
-            <option value="USD">US$ (market exchange rates)</option>
-            <option value="LCU">Local currency of a country</option>
-          </select>
+        <div class="step num one-only">
+          <div class="s-lab"><label for="country">Select currency (country) reported in original study (e.g. Viet Nam)</label><button type="button" class="info" data-i="i-country" aria-label="About the original country">i</button></div>
+          <div class="s-in"><select id="country" class="wide"></select></div>
+          <div class="info-text" id="i-country" hidden><p>The setting where the resources were used and paid for. Its currency is the starting point and its inflation drives Method 2.</p><p>Borrowing a cost from another country's study? Choose that study's country here, and your own setting as the target currency.</p></div>
         </div>
-        <div id="lcuBox" class="pair" hidden>
-          <div class="lab c1"><label for="tcountry">Country</label><button type="button" class="info" data-i="i-tc" aria-label="About the output country">i</button></div>
-          <div class="lab c2"><label for="basis">Convert with</label><button type="button" class="info" data-i="i-basis" aria-label="About the conversion basis">i</button></div>
-          <div class="info-text span" id="i-tc" hidden><p>The country whose currency you want, usually your study setting. Choose the same country as above to adjust for inflation only.</p></div>
-          <div class="info-text span" id="i-basis" hidden><p><b>Market rates</b> reflect what money buys in trade; Turner et&nbsp;al. (Figure 3) use them to bring costs from another setting into the study's currency.</p><p><b>PPP</b> reflects what money buys locally. The CCEMG–EPPI Cost Converter uses PPP; choose it, with the GDP deflator and Method 2, to follow that tool.</p></div>
-          <select id="tcountry" class="c1"></select>
-          <select id="basis" class="c2">
-            <option value="fx">Market rates</option>
-            <option value="ppp">PPP</option>
-          </select>
+
+        <div class="step num">
+          <div class="s-lab"><label for="out">Select target currency (country) (e.g. United Kingdom)</label><button type="button" class="info" data-i="i-out" aria-label="About the target currency">i</button></div>
+          <div class="s-in">
+            <select id="out">
+              <option value="INT">International $ (PPP)</option>
+              <option value="USD">US$ (market exchange rates)</option>
+              <option value="LCU">Local currency of a country:</option>
+            </select>
+            <span id="lcuBox" hidden>
+              <select id="tcountry" class="wide" aria-label="Target country"></select>
+              <label for="basis">converted with</label>
+              <select id="basis">
+                <option value="fx">market rates</option>
+                <option value="ppp">PPP</option>
+              </select><button type="button" class="info" data-i="i-basis" aria-label="About the conversion basis">i</button>
+            </span>
+          </div>
+          <div class="info-text" id="i-out" hidden><p><b>International $</b> converts with PPP factors, so I$1 buys in each country what US$1 buys in the United States. Better for comparing resource use across countries, and the usual choice in reviews.</p><p><b>US$</b> converts at market exchange rates: widely understood, but rates can swing.</p><p><b>Local currency of a country</b>: your study setting's money (as in the CCEMG–EPPI tool), or the same country to adjust for inflation only. Turner et&nbsp;al. suggest reporting local currency next to US$ or I$.</p></div>
+          <div class="info-text" id="i-basis" hidden><p><b>PPP</b> reflects what money buys locally; the CCEMG–EPPI Cost Converter uses PPP. <b>Market rates</b> reflect what money buys in trade; Turner et&nbsp;al. (Figure 3) use them to bring costs from another setting into the study's currency.</p></div>
         </div>
-        <div class="pair">
-          <div class="lab c1"><label for="measure">Inflation measure</label><button type="button" class="info" data-i="i-measure" aria-label="About Inflation measure">i</button></div>
-          <div class="lab c2"><label for="wordM">Main method</label><button type="button" class="info" data-i="i-main" aria-label="About Main method">i</button></div>
-          <div class="info-text span" id="i-measure" hidden><p><b>GDP deflator, linked series</b> (default): the price change of everything produced in the economy, with the jumps caused by rebasing the national accounts removed. WHO-CHOICE (2003) recommends the GDP deflator, and the CCEMG–EPPI tool uses it.</p><p><b>GDP deflator, standard series</b>: the World Bank's headline series; jumps at rebasing years are flagged.</p><p><b>Consumer price index</b>: the price change of a household shopping basket. It may not track healthcare prices.</p><p class="which">Which index? Medical-care price indices can rise faster or slower than the economy-wide indices; where a national health-sector deflator exists, it can be typed under Values used (Dunn et&nbsp;al., 2018).</p></div>
-          <div class="info-text span" id="i-main" hidden><p>The method reported as the main result; the other two are shown as sensitivity analyses, and the methods wording follows this choice.</p><p><b>Method 2</b> (default) with PPP and the GDP deflator is the CCEMG–EPPI default for reviews and needs no tradable share. Choose <b>Method 1</b> when resources are mostly tradable or local inflation is above about 15–20% a year, and <b>Method 3</b> when you know the tradable share.</p></div>
-          <select id="measure" class="c1">
+
+        <div class="step num one-only">
+          <div class="s-lab"><label for="y0">Select price year reported in original study (e.g. 1997)</label><button type="button" class="info" data-i="i-y0" aria-label="About the price year">i</button></div>
+          <div class="s-in"><select id="y0"></select></div>
+          <div class="info-text" id="i-y0" hidden><p>The year whose prices the cost is expressed in: the price year the study states, or else the year the costs were collected. It is usually not the publication year. For a fiscal year such as 2015/16, use the list mode, which can average the two calendar years. Years after the data are projected.</p></div>
+        </div>
+        <div class="step num list-only" hidden>
+          <div class="s-lab"><label for="fy">Select how to read fiscal price years (e.g. 2015/16)</label><button type="button" class="info" data-i="i-fy" aria-label="About fiscal years">i</button></div>
+          <div class="s-in"><select id="fy">
+            <option value="avg">Average of the two years</option>
+            <option value="start">First year (2015 for 2015/16)</option>
+            <option value="end">Second year (2016 for 2015/16)</option>
+            <option value="cal">Not allowed: flag the row</option>
+          </select></div>
+          <div class="info-text" id="i-fy" hidden><p>How to read a price year written as 2015/16, 2015-16 or FY2016-style ranges. <b>Average</b> converts the cost at both calendar years and averages the results; <b>First year</b> or <b>Second year</b> use one of them. A single year (2015) is always read as that calendar year.</p></div>
+        </div>
+
+        <div class="step num">
+          <div class="s-lab"><label for="y1">Select target price year (e.g. 2010)</label><button type="button" class="info" data-i="i-y1" aria-label="About the target price year">i</button></div>
+          <div class="s-in"><select id="y1"></select></div>
+          <div class="info-text" id="i-y1" hidden><p>The year whose prices you want the result in, usually your analysis year. It can be earlier than the price year: the calculator then deflates. You can choose up to 2037; years after the last World Bank figure (2024 or 2025 for most countries) use projected values, shown in red.</p></div>
+        </div>
+
+        <p class="further">Further options</p>
+
+        <div class="step">
+          <div class="s-lab"><label for="measure">Select inflation measure</label><button type="button" class="info" data-i="i-measure" aria-label="About the inflation measure">i</button></div>
+          <div class="s-in"><select id="measure">
             <option value="gdpd_l">GDP deflator, linked series</option>
             <option value="gdpd">GDP deflator, standard series</option>
             <option value="cpi">Consumer price index</option>
-          </select>
-          <select id="wordM" class="c2">
-            <option value="2" selected>Method 2</option><option value="1">Method 1</option><option value="3">Method 3</option>
-          </select>
+          </select></div>
+          <div class="info-text" id="i-measure" hidden><p><b>GDP deflator, linked series</b> (default): the price change of everything produced in the economy, with the jumps caused by rebasing the national accounts removed. WHO-CHOICE (2003) recommends the GDP deflator, and the CCEMG–EPPI tool uses it.</p><p><b>GDP deflator, standard series</b>: the World Bank's headline series; jumps at rebasing years are flagged.</p><p><b>Consumer price index</b>: the price change of a household shopping basket. It may not track healthcare prices.</p><p class="which">Which index? Medical-care price indices can rise faster or slower than the economy-wide indices; where a national health-sector deflator exists, it can be typed under Values used (Dunn et&nbsp;al., 2018).</p></div>
         </div>
-        <div id="fxBox">
-          <div class="lab"><label for="fxSrc">Exchange rates from</label><button type="button" class="info" data-i="i-fx" aria-label="About exchange rates">i</button></div>
-          <div class="info-text" id="i-fx" hidden><p><b>Official exchange rate</b> (PA.NUS.FCRF): the annual average rate set or reported by the national authority.</p><p><b>Alternative conversion factor</b> (PA.NUS.ATLS): the World Bank's own rate, which replaces the official rate in years with multiple or controlled exchange rates (for example Lebanon after 2019, Venezuela, Argentina before 2016). It also covers years after an official series stops. A warning appears where the two differ by more than 10%.</p></div>
-          <select id="fxSrc">
+
+        <div class="step" id="fxBox">
+          <div class="s-lab"><label for="fxSrc">Select source dataset for exchange rates</label><button type="button" class="info" data-i="i-fx" aria-label="About exchange rates">i</button></div>
+          <div class="s-in"><select id="fxSrc">
             <option value="fx">Official exchange rate</option>
             <option value="fx_alt">Alternative conversion factor (World Bank)</option>
-          </select>
+          </select></div>
+          <div class="info-text" id="i-fx" hidden><p><b>Official exchange rate</b> (PA.NUS.FCRF): the annual average rate set or reported by the national authority.</p><p><b>Alternative conversion factor</b> (PA.NUS.ATLS): the World Bank's own rate, which replaces the official rate in years with multiple or controlled exchange rates (for example Lebanon after 2019, Venezuela, Argentina before 2016). It also covers years after an official series stops. A warning appears where the two differ by more than 10%.</p></div>
         </div>
-        <div id="pppBox">
-          <div class="lab"><label for="pppSrc">PPP values from</label><button type="button" class="info" data-i="i-ppp" aria-label="About PPP values">i</button></div>
-          <div class="info-text" id="i-ppp" hidden><p><b>World Bank</b>: PPP conversion factors from the International Comparison Program (2021 benchmark), about 200 economies from 1990. A new benchmark revises every year, so a result can change when the World Bank updates the series; the calculator notes when the conversion spans a benchmark year.</p><p><b>OECD</b>: PPPs for GDP for 65 mostly high-income countries, some from the 1950s. The two differ slightly for OECD members, as the IMF and OECD options do in the CCEMG–EPPI tool.</p></div>
-          <select id="pppSrc">
-            <option value="ppp">World Bank (ICP, about 200 economies)</option>
-            <option value="ppp_oecd">OECD (65 countries)</option>
-          </select>
-        </div>
-        <div class="share-row">
-          <span class="lab" style="margin:0"><label for="share">Tradable share (Method 3)</label><button type="button" class="info" data-i="i-share" aria-label="About Tradable share">i</button></span>
-          <input type="range" id="share" min="0" max="100" step="5" value="20">
-          <output id="shareOut" for="share">20%</output>
-        </div>
-        <div class="info-text" id="i-share" hidden><p>The part of the cost spent on <b>tradable</b> resources bought on world markets: imported drugs, equipment, laboratory supplies. The rest is <b>nontradable</b>: staff time, buildings, local services.</p><p>Method 3 adjusts the tradable part with Method 1 and the rest with Method 2. An ingredients-based costing usually shows which items were imported; Turner et&nbsp;al. suggest treating imported items as tradable.</p></div>
 
-        <div id="projBox" hidden>
-          <p class="sublegend">Years after the data</p>
-          <div class="pair">
-            <div class="lab c1"><label for="projYears">Inflation</label><button type="button" class="info" data-i="i-projy" aria-label="About projected inflation">i</button></div>
-            <div class="lab c2"><label for="projFx">Exchange rates</label><button type="button" class="info" data-i="i-projfx" aria-label="About projected exchange rates">i</button></div>
-            <div class="info-text span" id="i-projy" hidden><p><b>IMF forecasts</b> (default): after a country's last year of World Bank data, its price index follows the IMF World Economic Outlook inflation forecast (average consumer prices) year by year; after the last forecast year the last rate is held. Countries without a forecast use their 10-year average.</p><p><b>5-, 10- or 20-year average</b>: the index grows at the country's own average annual rate over its last 5, 10 or 20 years of data.</p><p>Projected results are rounded to 3 significant figures and shown with the range from the 5- and 20-year rules. A series that stopped more than 3 years before the latest data is not projected.</p></div>
-            <div class="info-text span" id="i-projfx" hidden><p><b>Follow inflation gap</b>: a currency loses value against the US$ at the gap between its projected inflation and US inflation (relative purchasing power parity). <b>Hold last rate</b>: the last observed rate is kept. PPP factors always follow the GDP-deflator gap, as the World Bank does between benchmark years.</p></div>
-            <select id="projYears" class="c1">
+        <div class="step">
+          <div class="s-lab"><label for="wordM">Select the method reported as the final result</label><button type="button" class="info" data-i="i-main" aria-label="About the main method">i</button></div>
+          <div class="s-in"><select id="wordM">
+            <option value="2" selected>Method 2: local inflation, then convert (CCEMG–EPPI)</option>
+            <option value="1">Method 1: convert, then US or target-country inflation</option>
+            <option value="3">Method 3: tradable share by Method 1, the rest by Method 2</option>
+          </select></div>
+          <div class="info-text" id="i-main" hidden><p>The method reported as the final result; the other two are shown as sensitivity analyses, and the methods wording follows this choice.</p><p><b>Method 2</b> (default) with PPP and the GDP deflator is the CCEMG–EPPI computation and needs no tradable share. Choose <b>Method 1</b> when resources are mostly tradable or local inflation is above about 15–20% a year, and <b>Method 3</b> when you know the tradable share.</p></div>
+        </div>
+
+        <div class="step">
+          <div class="s-lab"><label for="share">Select tradable share (Method 3)</label><button type="button" class="info" data-i="i-share" aria-label="About the tradable share">i</button></div>
+          <div class="s-in share-row"><input type="range" id="share" min="0" max="100" step="5" value="20"><output id="shareOut" for="share">20%</output></div>
+          <div class="info-text" id="i-share" hidden><p>The part of the cost spent on <b>tradable</b> resources bought on world markets: imported drugs, equipment, laboratory supplies. The rest is <b>nontradable</b>: staff time, buildings, local services.</p><p>Method 3 adjusts the tradable part with Method 1 and the rest with Method 2. An ingredients-based costing usually shows which items were imported; Turner et&nbsp;al. suggest treating imported items as tradable.</p></div>
+        </div>
+
+        <div class="step">
+          <div class="s-lab"><label for="dec">Select decimal mark used in the study</label><button type="button" class="info" data-i="i-dec" aria-label="About the decimal mark">i</button></div>
+          <div class="s-in"><select id="dec">
+            <option value="auto">Automatic</option>
+            <option value=".">Point: 1,234.56</option>
+            <option value=",">Comma: 1.234,56</option>
+          </select></div>
+          <div class="info-text" id="i-dec" hidden><p><b>Automatic</b> reads 1,000,000 and 2,500.50 as written in English, and 12,5 or 1.234,56 as a decimal comma. A number such as 1,000 or 1.000 could be read either way; the calculator says how it read it. Choose <b>Comma</b> if the study writes 2.500,50, or <b>Point</b> to read every comma as a thousands separator. Currency signs (£, €, US$) and spaces are ignored.</p></div>
+        </div>
+
+        <div class="step" id="projBox" hidden>
+          <div class="s-lab"><label for="projYears">Select how to project years after the data</label><button type="button" class="info" data-i="i-projy" aria-label="About projections">i</button></div>
+          <div class="s-in">
+            <label for="projYears">inflation</label>
+            <select id="projYears">
               <option value="weo">IMF forecasts (WEO)</option>
               <option value="10">10-year average</option>
               <option value="5">5-year average</option>
               <option value="20">20-year average</option>
             </select>
-            <select id="projFx" class="c2">
+            <label for="projFx">exchange rates</label>
+            <select id="projFx">
               <option value="gap">Follow inflation gap</option>
               <option value="hold">Hold last rate</option>
             </select>
           </div>
+          <div class="info-text" id="i-projy" hidden><p><b>IMF forecasts</b> (default): after a country's last year of World Bank data, its price index follows the IMF World Economic Outlook inflation forecast (average consumer prices) year by year; after the last forecast year the last rate is held. Countries without a forecast use their 10-year average. <b>5-, 10- or 20-year average</b>: the index grows at the country's own average annual rate over its last 5, 10 or 20 years of data.</p><p>Exchange rates: <b>Follow inflation gap</b> lets a currency lose value against the US$ at the gap between its projected inflation and US inflation (relative purchasing power parity); <b>Hold last rate</b> keeps the last observed rate. PPP factors always follow the GDP-deflator gap.</p><p>Projected results are rounded to 3 significant figures and shown with the range from the 5- and 20-year rules. A series that stopped more than 3 years before the latest data is not projected.</p></div>
         </div>
-      </fieldset>
-
-      <div class="actions" id="exampleActions">
-        <button type="button" class="btn ghost" data-example="paper">Load the paper's worked example</button>
-        <a href="#guide" class="btn ghost">How to use</a>
       </div>
+
+      <p class="avail one-only" id="avail"></p>
+      <p class="actions" id="exampleActions"><button type="button" class="linkbtn" data-example="paper">Load the worked example of Turner et al. (2019)</button></p>
     </form>
 
     <section id="oneOut" class="out" aria-live="polite">
+      <h2 class="res-h">Results</h2>
+      <div class="tablebox plain"><table id="resTable" class="res"></table></div>
+      <div class="foot" id="resFoot"></div>
       <div class="alerts" id="alerts"></div>
-      <div class="tiles" id="tiles"></div>
       <p class="which" id="which"></p>
       <p class="spread" id="spread"></p>
 
@@ -462,72 +441,56 @@ td input.ov.projected { border-style: dashed; border-color: var(--proj); }
     </section>
 
     <section id="listOut" class="out" hidden aria-live="polite">
-      <div class="alerts" id="listAlerts"></div>
       <div class="sec">
-        <div class="sec-head"><h2 id="listTitle">Converted costs</h2><span class="spacer"></span>
+        <div class="sec-head"><h2 class="res-h" id="listTitle">Results</h2><span class="spacer"></span>
           <span class="src" id="listMsg"></span>
           <button type="button" class="btn" id="copyList">Copy table for Excel</button>
           <button type="button" class="btn ghost" id="dlList">Download CSV</button></div>
         <p class="src" id="listLead"></p>
         <div class="tablebox"><table id="listTable"></table></div>
       </div>
+      <div class="alerts" id="listAlerts"></div>
     </section>
-  </div>
 
-  <section class="how" id="how">
-    <h2>How the calculator works</h2>
-    <div class="how-grid">
-      <div>
-        <h3>The three methods</h3>
-        <div class="formula">M1  V = C ÷ r<sub>S</sub>(t0) × r<sub>T</sub>(t0) × P<sub>T</sub>(t1)/P<sub>T</sub>(t0)
-M2  V = C × P<sub>S</sub>(t1)/P<sub>S</sub>(t0) ÷ r<sub>S</sub>(t1) × r<sub>T</sub>(t1)
-M3  V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
-        <p>C: cost in country S's currency at year-t0 prices. V: result in currency T at base-year t1 prices. r: local currency per US$ (market) or per I$ (PPP). P: GDP deflator or CPI. s: tradable share. For US$ and I$, r<sub>T</sub> = 1 and P<sub>T</sub> is the US index.</p>
-      </div>
-      <div>
-        <h3>Which method to use</h3>
-        <ul>
-          <li><b style="color:var(--m1)">Method 1</b> converts first, then inflates with US prices: suits tradable resources (imported drugs, equipment).</li>
-          <li><b style="color:var(--m2)">Method 2</b> inflates with local prices, then converts at the base-year rate: suits nontradable resources (staff, local services). With PPP and the GDP deflator it is the CCEMG–EPPI default and the main result here.</li>
-          <li><b style="color:var(--m3)">Method 3</b> treats each part with the method that suits it; Turner et&nbsp;al. recommend it when the cost can be split.</li>
-          <li>With local inflation above about 15–20% a year, Kumaranayake (2000) advises working in US$ (Method 1).</li>
-        </ul>
-      </div>
-      <div>
-        <h3>Years after the data</h3>
-        <p>Price and base years run to 2037. After a country's last year of World Bank data, its price index follows the IMF World Economic Outlook inflation forecasts (or its own 5-, 10- or 20-year average), exchange rates follow the inflation gap against the US, and PPP factors follow the GDP-deflator gap. Projected values are marked in green, rounded to 3 significant figures, and can be replaced with your own rates.</p>
-      </div>
-      <div>
-        <h3>Data and currency units</h3>
-        <p>Indices, exchange rates and PPP factors come from the World Bank, the OECD and the IMF (listed below). Every money value is in the country's current currency unit for every year: exchange rates published in an older unit (pre-euro, Bulgaria, Venezuela, Zimbabwe) are re-expressed, and an automatic check confirms that exchange rates and PPP factors agree with GDP in local currency and US$. Deflator base years differ by country but only within-country ratios are used.</p>
-      </div>
-    </div>
-  </section>
+    <section class="how" id="info">
+      <h2>Information for users</h2>
+      <p>This web-based tool adjusts estimates of costs from their original currency and price year to a target currency and/or price year. A step-by-step guide with worked examples is on the <a href="#guide">How to use</a> page.</p>
 
-  <section class="how sources" id="sources">
-    <h2>Sources</h2>
-    <div class="how-grid">
-      <div>
-        <h3>Data</h3>
-        <ol id="dataSources"></ol>
-      </div>
-      <div>
-        <p class="xl-link"><b>Excel workings.</b> Every calculation on this page is repeated as Excel formulas, with the data, so anyone can check a result: <a href="Cost_Converter_Workings.xlsx" download>Cost_Converter_Workings.xlsx</a>.</p>
-        <h3>Methods</h3>
-        <ol>
-          <li>Turner HC, Lauer JA, Tran BX, Teerawattananon Y, Jit M. Adjusting for inflation and currency changes within health economic studies. <i>Value in Health</i>. 2019;22(9):1026–1032. <a href="https://doi.org/10.1016/j.jval.2019.03.021">doi:10.1016/j.jval.2019.03.021</a></li>
-          <li>Shemilt I, Thomas J, Morciano M. A web-based tool for adjusting costs to a specific target currency and price year. <i>Evidence &amp; Policy</i>. 2010;6(1):51–59. <a href="https://doi.org/10.1332/174426410X482999">doi:10.1332/174426410X482999</a></li>
-          <li>Kumaranayake L. The real and the nominal? Making inflationary adjustments to cost and other economic data. <i>Health Policy and Planning</i>. 2000;15:230–234.</li>
-          <li>Dunn A, Grosse SD, Zuvekas SH. Adjusting health expenditures for inflation: a review of measures for health services research in the United States. <i>Health Services Research</i>. 2018;53(1):175–196. <a href="https://doi.org/10.1111/1475-6773.12612">doi:10.1111/1475-6773.12612</a></li>
-          <li>WHO-CHOICE. <i>Making Choices in Health: WHO Guide to Cost-Effectiveness Analysis</i>. Geneva: World Health Organization; 2003.</li>
-          <li>Global Health Costing Consortium. Reference case for estimating the costs of global health services and interventions. <a href="https://ghcosting.org/pages/standards/reference_case">ghcosting.org</a></li>
-          <li>CCEMG – EPPI-Centre Cost Converter, version 1.7 (January 2024). EPPI Centre, UCL. <a href="https://eppi.ioe.ac.uk/costconversion/">eppi.ioe.ac.uk/costconversion</a></li>
-          <li>Council Regulation (EC) No 2866/98 on the conversion rates between the euro and the currencies of the Member States adopting the euro, as amended for each later member (irrevocable euro conversion rates); national redenomination laws as listed in <span class="mono">data/currency_history.csv</span>.</li>
-        </ol>
-        <p class="src">Cite the version and data vintage shown at the top of the page. Code MIT licence; data CC BY 4.0 from the sources above. <a href="https://github.com/narassima/Health-Cost-Converter">Source code, tests and changelog</a>.</p>
-      </div>
-    </div>
-  </section>
+      <h3>Version</h3>
+      <p>The current version of this tool is <span id="infoVer"></span>. Changes between versions are listed in the <a href="https://github.com/narassima/Health-Cost-Converter/blob/main/CHANGELOG.md">changelog</a>. Cite the version and data vintage shown at the top of the page.</p>
+
+      <h3>How the tool works…</h3>
+      <p>The tool computes each cost in up to three ways, following Turner et&nbsp;al. (2019). With C the cost in country S's currency at year-t0 prices and V the result in currency T at target-year t1 prices:</p>
+      <div class="formula">Method 1   V = C ÷ r<sub>S</sub>(t0) × r<sub>T</sub>(t0) × P<sub>T</sub>(t1)/P<sub>T</sub>(t0)
+Method 2   V = C × P<sub>S</sub>(t1)/P<sub>S</sub>(t0) ÷ r<sub>S</sub>(t1) × r<sub>T</sub>(t1)
+Method 3   V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
+      <p>r: local currency per US$ (market) or per I$ (PPP). P: GDP deflator or CPI. s: tradable share. For US$ and I$, r<sub>T</sub> = 1 and P<sub>T</sub> is the US index.</p>
+      <p><b>Method 2</b> is a two-stage computation, as in the CCEMG–EPPI Cost Converter. Stage 1 adjusts the original estimate of cost from the original price year to the target price year, using the original country's price index (the implied inflation factor, IIF). Stage 2 converts the price-year adjusted cost from the original currency to the target currency, using PPP values (or exchange rates) for the target year (the implied conversion factor, ICF). With PPP and the GDP deflator this is the default and the final result.</p>
+      <p><b>Method 1</b> converts first, at the price-year rate, then inflates with US prices (or the target country's prices): it suits tradable resources such as imported drugs and equipment. <b>Method 3</b> treats a tradable share with Method 1 and the rest with Method 2; Turner et&nbsp;al. recommend it when the cost can be split. With local inflation above about 15–20% a year, Kumaranayake (2000) advises working in US$ (Method 1). For high-income settings, Turner et&nbsp;al. advise reporting in the local currency with local inflation.</p>
+
+      <h3>Years after the data</h3>
+      <p>Price and target years run to 2037. After a country's last year of World Bank data, its price index follows the IMF World Economic Outlook inflation forecasts (or its own 5-, 10- or 20-year average), exchange rates follow the inflation gap against the US, and PPP factors follow the GDP-deflator gap. Projected values are displayed in red type; results that use them are rounded to 3 significant figures, and can be recomputed with your own rates.</p>
+
+      <h3>Data and currency units</h3>
+      <p>Indices, exchange rates and PPP factors come from the World Bank, the OECD and the IMF (listed below). Every money value is in the country's current currency unit for every year: exchange rates published in an older unit (pre-euro, Bulgaria, Venezuela, Zimbabwe) are re-expressed, and an automatic check confirms that exchange rates and PPP factors agree with GDP in local currency and US$. Deflator base years differ by country but only within-country ratios are used. Statistical agencies revise past values, so results can differ slightly from published studies that used older releases.</p>
+      <p class="xl-link"><b>Excel workings.</b> Every calculation on this page is repeated as Excel formulas, with the data, so anyone can check a result: <a href="Cost_Converter_Workings.xlsx" download>Cost_Converter_Workings.xlsx</a>.</p>
+
+      <h3>Data sources</h3>
+      <ol id="dataSources" class="refs"></ol>
+
+      <h3>References</h3>
+      <ol class="refs">
+        <li>Turner HC, Lauer JA, Tran BX, Teerawattananon Y, Jit M. Adjusting for inflation and currency changes within health economic studies. <i>Value in Health</i>. 2019;22(9):1026–1032. <a href="https://doi.org/10.1016/j.jval.2019.03.021">doi:10.1016/j.jval.2019.03.021</a></li>
+        <li>Shemilt I, Thomas J, Morciano M. A web-based tool for adjusting costs to a specific target currency and price year. <i>Evidence &amp; Policy</i>. 2010;6(1):51–59. <a href="https://doi.org/10.1332/174426410X482999">doi:10.1332/174426410X482999</a></li>
+        <li>Kumaranayake L. The real and the nominal? Making inflationary adjustments to cost and other economic data. <i>Health Policy and Planning</i>. 2000;15:230–234.</li>
+        <li>Dunn A, Grosse SD, Zuvekas SH. Adjusting health expenditures for inflation: a review of measures for health services research in the United States. <i>Health Services Research</i>. 2018;53(1):175–196. <a href="https://doi.org/10.1111/1475-6773.12612">doi:10.1111/1475-6773.12612</a></li>
+        <li>WHO-CHOICE. <i>Making Choices in Health: WHO Guide to Cost-Effectiveness Analysis</i>. Geneva: World Health Organization; 2003.</li>
+        <li>Global Health Costing Consortium. Reference case for estimating the costs of global health services and interventions. <a href="https://ghcosting.org/pages/standards/reference_case">ghcosting.org</a></li>
+        <li>CCEMG – EPPI-Centre Cost Converter, version 1.7 (January 2024). EPPI Centre, UCL. <a href="https://eppi.ioe.ac.uk/costconversion/">eppi.ioe.ac.uk/costconversion</a></li>
+        <li>Council Regulation (EC) No 2866/98 on the conversion rates between the euro and the currencies of the Member States adopting the euro, as amended for each later member (irrevocable euro conversion rates); national redenomination laws as listed in <span class="mono">data/currency_history.csv</span>.</li>
+      </ol>
+      <p class="src">Code MIT licence; data CC BY 4.0 from the sources above. <a href="https://github.com/narassima/Health-Cost-Converter">Source code, tests and changelog</a>.</p>
+    </section>
   </div>
 
   <!-- ===================================================== GUIDE -->
@@ -555,11 +518,12 @@ M3  V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
         <section id="g-quick">
           <h3>2. Quick start</h3>
           <ol>
-            <li>Type the <b>Amount</b> and say what it is <b>Reported in</b> (usually local currency). If the study used a former currency (DEM, old leones), choose it under <b>Amount is in</b>.</li>
-            <li>Choose the <b>Country where incurred</b> and the <b>Price year</b>.</li>
-            <li>Under <b>Convert to</b>, choose the <b>Base year</b> and <b>Output currency</b>.</li>
-            <li>Keep the <b>linked GDP deflator</b> and <b>Method 2</b> unless you have a reason to change them.</li>
-            <li>Read the main result and the sensitivity results, check the warnings and <b>Values used</b>, then copy the <b>wording</b> or a <b>link</b> to the calculation.</li>
+            <li><b>Step 1</b>: type the cost estimate and say whether it is in local currency, US$ or I$ (usually local currency). If the study used a former currency (DEM, old leones), choose it under <b>Amount is in</b>.</li>
+            <li><b>Step 2</b>: keep the World Bank PPP values, or choose the OECD ones.</li>
+            <li><b>Steps 3 and 4</b>: choose the currency (country) of the original study and the target currency.</li>
+            <li><b>Steps 5 and 6</b>: choose the original price year and the target price year.</li>
+            <li>Keep the further options (the <b>linked GDP deflator</b> and <b>Method 2</b>) unless you have a reason to change them.</li>
+            <li>Read the final result and the sensitivity analyses in the <b>Results</b> table, check the warnings and <b>Values used</b>, then copy the <b>wording</b> or a <b>link</b> to the calculation.</li>
           </ol>
         </section>
         <section id="g-currency">
@@ -582,7 +546,7 @@ M3  V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
             <tr><td><span class="mk m3"></span> Method 3</td><td>Tradable share through Method 1, the rest through Method 2</td><td>An ingredients-based costing shows which items were imported</td><td>Needs a split that published studies often do not report</td></tr>
           </tbody>
         </table></div>
-        <p>If you cannot split the cost, Turner et&nbsp;al. suggest Method 1 when tradable resources dominate and Method 2 when nontradable resources dominate. The gap between the methods grows with the gap between local and US inflation. Choose the main method under <b>Main method</b>; the other two are labelled sensitivity analyses.</p>
+        <p>If you cannot split the cost, Turner et&nbsp;al. suggest Method 1 when tradable resources dominate and Method 2 when nontradable resources dominate. The gap between the methods grows with the gap between local and US inflation. Choose the method reported as the final result under the further options; the other two are labelled sensitivity analyses.</p>
       </section>
 
       <div class="g-row">
@@ -595,13 +559,13 @@ M3  V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
         </section>
         <section id="g-ex2" class="card-sec">
           <h3>6. Example: a cost reported in US$</h3>
-          <p>A study reports US$ 100 for Vietnam in 2006; you want 2016 US$. Choose <b>Reported in: US$</b>. The calculator converts back to VND 1,599,425 at the 2006 rate, applies Vietnamese inflation for Method 2, and converts at the 2016 rate (Figure 4 of the paper).</p>
+          <p>A study reports US$ 100 for Vietnam in 2006; you want 2016 US$. In Step 1 choose <b>in US$ (study converted)</b>. The calculator converts back to VND 1,599,425 at the 2006 rate, applies Vietnamese inflation for Method 2, and converts at the 2016 rate (Figure 4 of the paper).</p>
           <p><span class="expect">US$ 116.84 · 172.09 · 161.04</span></p>
           <div class="actions"><button type="button" class="btn ghost" data-example="usd">Open in the calculator</button></div>
         </section>
         <section id="g-ex3" class="card-sec">
           <h3>7. Example: a cost from another country</h3>
-          <p>You cost a programme in India and borrow a UK unit cost of £1,200 at 2015 prices. Choose <b>United Kingdom</b>, <b>2015</b>, then <b>Local currency of a country</b>: <b>India</b>, base year <b>2024</b>. Turner et&nbsp;al. (Figure 3) convert at market rates; the CCEMG–EPPI tool uses PPP. Both are offered under <b>Convert with</b>.</p>
+          <p>You cost a programme in India and borrow a UK unit cost of £1,200 at 2015 prices. Choose <b>United Kingdom</b>, <b>2015</b>, then <b>Local currency of a country</b>: <b>India</b>, target price year <b>2024</b>. Turner et&nbsp;al. (Figure 3) convert at market rates; the CCEMG–EPPI tool uses PPP. Both are offered next to the target country (<b>converted with</b>).</p>
           <div class="actions"><button type="button" class="btn ghost" data-example="borrow">Open in the calculator</button></div>
         </section>
       </div>
@@ -615,7 +579,7 @@ M3  V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
             <li>Check the matches under <b>Columns</b>; change any that are wrong.</li>
             <li>Currency: blank or the local code (INR) for local currency; USD or I$ for converted amounts; an old code such as DEM or SLL for amounts in a former currency.</li>
             <li>Price years such as 2015/16 are read as set under <b>Fiscal years</b> (average of the two years by default).</li>
-            <li>Set <b>Convert to</b> once; it applies to every row. The Notes column gives the warnings for each row.</li>
+            <li>Set the PPP source, target currency and target price year once; it applies to every row. The Notes column gives the warnings for each row.</li>
             <li><b>Copy table for Excel</b> or <b>Download CSV</b>. The export keeps full precision, adds the rounded main result, and ends with the tool version, data vintage, series codes and settings.</li>
           </ol>
         </section>
@@ -633,14 +597,14 @@ M3  V = s × V<sub>1</sub> + (1 − s) × V<sub>2</sub></div>
 
       <div class="g-row">
         <section id="g-future">
-          <h3>10. Base years after the data (to 2037)</h3>
+          <h3>10. Price years after the data (to 2037)</h3>
           <p>World Bank data end in 2024 or 2025 for most countries. For later years the calculator projects:</p>
           <ul>
             <li><b>Price indices</b> with the IMF World Economic Outlook inflation forecasts (to 2031, then the last rate held), or at each country's average rate over its last 5, 10 or 20 years.</li>
             <li><b>Exchange rates</b> following the inflation gap against the US, or held at the last rate.</li>
             <li><b>PPP factors</b> following the GDP-deflator gap against the US.</li>
           </ul>
-          <p>Projected values are green and results are rounded to 3 significant figures, with the range from the 5- and 20-year rules. <b>Projection assumptions</b> lists each country's rates; type a rate to replace them. A series that stopped more than 3 years before the latest data is not projected. Projections are assumptions, not data: say so in your report.</p>
+          <p>Projected values are shown in red type and results are rounded to 3 significant figures, with the range from the 5- and 20-year rules. <b>Projection assumptions</b> lists each country's rates; type a rate to replace them. A series that stopped more than 3 years before the latest data is not projected. Projections are assumptions, not data: say so in your report.</p>
           <div class="actions"><button type="button" class="btn ghost" data-example="future">Open: INR 5,000 at 2022 prices to 2032</button></div>
         </section>
         <section id="g-warn">
@@ -1116,15 +1080,54 @@ function chainHTML(items) {
 function flowHTML(m, body) {
   return '<div class="flow m' + m + '"><div class="fl-lab"><span class="mk" aria-hidden="true"></span>Method ' + m + '</div><div class="fl-body">' + body + "</div></div>";
 }
-function tile(m, sub, v, r, max, main, bd) {
-  const w = v == null || max <= 0 ? 0 : (v / max) * 100;
-  const range = r.projected && bd && v != null ? '<span class="band">Range ' + esc(num(bd[0], true)) + " to " + esc(num(bd[1], true)) + " (5- and 20-year trends)</span>" : "";
-  return '<div class="tile m' + m + (main ? " main" : "") + '"><div class="t-top"><span class="mk" aria-hidden="true"></span>Method ' + m +
-    '<span class="role' + (main ? " main" : "") + '">' + (main ? "Main result" : "Sensitivity") + "</span></div>" +
-    '<p class="t-sub">' + esc(sub) + '</p><p class="big">' + (v == null ? "—" : esc(money(v, r.tCur, r.projected))) + "</p>" +
-    '<div class="t-bar"><span style="width:' + w.toFixed(1) + '%"></span></div>' +
-    '<p class="big-sub">' + (v == null ? "Missing data: see the note above" : r.y1 + " prices" + (r.projected ? ' · <span class="pj">projected</span>' : "")) + "</p>" +
-    (range ? '<p class="big-sub">' + range + "</p>" : "") + "</div>";
+function resultsHTML(r, m, bd, subs) {
+  // laid out like the CCEMG–EPPI results table: one row per country, then the final result
+  const pj = (txt, proj) => (proj ? '<span class="pj">' + esc(txt) + "</span>" : esc(txt));
+  const pair = (a, ra, b, rb, f) => pj(f(a), isProj(r, ra)) + ' <span class="bar">|</span> ' + pj(f(b), isProj(r, rb));
+  const fx = r.basis.indexOf("fx") === 0;
+  const idx = r.P === "cpi" ? "CPI values" : "GDPD values";
+  const tName = r.set.out === "USD" ? "US$ (United States)" : r.set.out === "INT" ? "International $" : r.tCur + " (" + nameOf(r.T) + ")";
+  const head = "<thead><tr><th></th><th>Currency (country)</th><th class=\"n\">Price year</th><th class=\"n\">" + (fx ? "Exchange rates" : "PPP values") +
+    '<small>' + r.y0 + " | " + r.y1 + '</small></th><th class="n">ICF**<small>' + r.y0 + " | " + r.y1 + '</small></th><th class="n">' + idx +
+    "<small>" + r.y0 + " | " + r.y1 + '</small></th><th class="n">IIF***</th><th class="n">Results</th></tr></thead>';
+  let start = esc(money(r.CS, r.sCur));
+  if (r.inp.cur === "USD" || r.inp.cur === "INT")
+    start = esc(money(r.inp.cost, r.inp.cur === "USD" ? "US$" : "I$")) + ' <span class="src">× ' + pj(rate(r.inRate), isProj(r, "in")) + " =</span><br>" + start;
+  else if (r.old)
+    start = esc(money(r.inp.cost, showCode(r.old.code))) + '* <span class="src">÷ ' + pj(rate(r.oldDiv), isProj(r, "old")) + " =</span><br>" + start;
+  const dash = '<span class="src">—</span>';
+  const rowS = "<tr><th scope=\"row\">Original</th><td>" + esc(r.sCur + " (" + nameOf(r.S) + ")") + '</td><td class="n">' + r.y0 + '</td><td class="n">' +
+    (r.same ? dash : pair(r.rS0, "rS0", r.rS1, "rS1", rate)) + '</td><td class="n">' + dash + '</td><td class="n">' + pair(r.iS0, "iS0", r.iS1, "iS1", rate) +
+    '</td><td class="n">' + pj(fac(r.infS), isProj(r, "iS0") || isProj(r, "iS1")) + '</td><td class="n">' + start + "</td></tr>";
+  const tIdx = r.I === r.S ? dash : pair(r.iT0, "iT0", r.iT1, "iT1", rate);
+  const tInf = r.I === r.S ? dash : pj(fac(r.infT), isProj(r, "iT0") || isProj(r, "iT1"));
+  const rowT = "<tr><th scope=\"row\">Target</th><td>" + esc(tName) + '</td><td class="n">' + r.y1 + '</td><td class="n">' +
+    (r.same ? dash : r.set.out === "LCU" ? pair(r.rT0, "rT0", r.rT1, "rT1", rate) : "1 <span class=\"bar\">|</span> 1") + '</td><td class="n">' +
+    (r.same ? dash : pj(rate(r.cross0), isProj(r, "rS0") || isProj(r, "rT0")) + ' <span class="bar">|</span> ' + pj(rate(r.cross1), isProj(r, "rS1") || isProj(r, "rT1"))) + '</td><td class="n">' + tIdx + '</td><td class="n">' + tInf + '</td><td class="n"></td></tr>';
+  const vals = [r.v1, r.v2, r.v3];
+  const res = (k) => {
+    const v = vals[k - 1];
+    if (v == null) return '<span class="miss">Missing data</span>';
+    const b = r.projected && bd ? bd[k - 1] : null;
+    const range = b ? '<br><span class="band">range ' + esc(num(b[0], true)) + " to " + esc(num(b[1], true)) + "</span>" : "";
+    return esc(money(v, r.tCur, r.projected)) + range;
+  };
+  const order = [+m].concat([1, 2, 3].filter((k) => k !== +m));
+  const rows = order.map((k, i) => {
+    const lab = i === 0 ? "<b>Final result:</b> original cost estimate converted to target currency and price year (Method " + k + ": " + esc(subs[k - 1]) + ")"
+                        : "Sensitivity analysis, Method " + k + ": " + esc(subs[k - 1]);
+    return '<tr class="' + (i === 0 ? "final" : "sens") + '"><td colspan="7">' + lab + '</td><td class="n">' + (i === 0 ? "<b>" + res(k) + "</b>" : res(k)) + "</td></tr>";
+  });
+  return head + "<tbody>" + rowS + rowT + rows.join("") + "</tbody>";
+}
+function resultsFoot(r) {
+  const fx = r.basis.indexOf("fx") === 0;
+  const unit = fx ? "local currency per US$" : "local currency per international $";
+  return (r.old ? "<p>* The amount was entered in " + esc(showCode(r.old.code)) + " and divided by the legal conversion rate (data/currency_history.csv).</p>" : "<p>* Old currency units (for example Deutsche Mark, old leones) can be chosen next to the amount when they apply.</p>") +
+    "<p>** ICF = Implied Conversion Factor: target currency per unit of the original currency (Method 1 uses the " + r.y0 + " value, Method 2 the " + r.y1 + " value).</p>" +
+    "<p>*** IIF = Implied Inflation Factor: price index in " + r.y1 + " ÷ price index in " + r.y0 + ".</p>" +
+    "<p>" + (fx ? "Exchange rates" : "PPP values") + " are in " + unit + "; " + (r.P === "cpi" ? "CPI" : "GDPD") + " values are " + esc(INDEX_LONG[r.P]) + " values.</p>" +
+    "<p>NB. Values displayed in <span class=\"pj\">red type</span> lie beyond the last year of data and are projected; results that use them are rounded to 3 significant figures.</p>";
 }
 function whichLine(m, r) {
   const p = Math.round(r.set.share * 100);
@@ -1138,7 +1141,7 @@ function renderOne() {
   if (inp.cost == null) {
     $("alerts").innerHTML = '<div class="alert bad">Type the amount as a number, for example 1,000,000 or 2500.50 (' + esc(inp.err || "not a number") + "). " +
       "Set <b>Decimal mark</b> if the study writes 2.500,50.</div>";
-    ["tiles", "flows"].forEach((id) => { $(id).innerHTML = ""; });
+    ["resTable", "resFoot", "flows"].forEach((id) => { $(id).innerHTML = ""; });
     $("spread").textContent = ""; $("which").textContent = "";
     return;
   }
@@ -1154,9 +1157,8 @@ function renderOne() {
   const sub1 = r.same ? "Inflate with " + nameOf(r.S) + " prices" : "Exchange at " + r.y0 + " rate, then " + infWho(r) + " inflation";
   const sub2 = r.same ? "Inflate with " + nameOf(r.S) + " prices" : nameOf(r.S) + " inflation, then exchange at " + r.y1 + " rate";
   const sub3 = p + "% tradable via Method 1, " + (100 - p) + "% via Method 2";
-  const vals = [r.v1, r.v2, r.v3];
-  const max = Math.max.apply(null, vals.filter((v) => v != null).concat([0]));
-  $("tiles").innerHTML = [[1, sub1], [2, sub2], [3, sub3]].map((t) => tile(t[0], t[1], vals[t[0] - 1], r, max, String(t[0]) === m, bd && bd[t[0] - 1])).join("");
+  $("resTable").innerHTML = resultsHTML(r, m, bd, [sub1, sub2, sub3]);
+  $("resFoot").innerHTML = resultsFoot(r);
   $("which").textContent = whichLine(m, r);
 
   if (r.v1 != null && r.v2 != null && r.v1 > 0) {
@@ -1539,7 +1541,8 @@ function setMode(m) {
   MODE = m;
   $("modeOne").setAttribute("aria-selected", m === "one");
   $("modeList").setAttribute("aria-selected", m === "list");
-  $("oneFields").hidden = m !== "one"; $("listFields").hidden = m !== "list";
+  document.querySelectorAll(".one-only").forEach((el) => { el.hidden = m !== "one"; });
+  document.querySelectorAll(".list-only").forEach((el) => { el.hidden = m !== "list"; });
   $("oneOut").hidden = m !== "one"; $("listOut").hidden = m !== "list";
   render();
 }
@@ -1549,6 +1552,7 @@ function showPage() {
   $("navCalc").setAttribute("aria-current", guide ? "false" : "page");
   $("navGuide").setAttribute("aria-current", guide ? "page" : "false");
   if (guide && location.hash.indexOf("#g-") === 0) { const t = document.querySelector(location.hash); if (t) t.scrollIntoView(); }
+  else if (location.hash === "#info") $("info").scrollIntoView();
   else if (!guide && location.hash.indexOf("?") < 0) window.scrollTo(0, 0);
 }
 function copyText(text, msgEl, done) {
@@ -1604,6 +1608,7 @@ function init() {
   $("list").value = EXAMPLE_LIST;
   $("stamp").textContent = "World Bank WDI " + DATA.meta.wdiText + " · IMF WEO " + DATA.meta.weo;
   $("ver").textContent = "v" + VERSION;
+  $("infoVer").textContent = VERSION + " (data: World Bank WDI " + DATA.meta.wdiText + ", IMF WEO " + DATA.meta.weo + ")";
   const cnt = (s) => Object.keys(DATA.series[s]).length;
   const rng = (s) => { let a = 9999, b = 0; Object.keys(DATA.series[s]).forEach((iso) => { const x = span(s, iso); if (x) { a = Math.min(a, x[0]); b = Math.max(b, x[1]); } }); return a + "–" + b; };
   const WB = "https://data.worldbank.org/indicator/";
@@ -1634,6 +1639,7 @@ function init() {
     LISTMAP[s.dataset.f] = +s.value;
     renderList();
   });
+  $("recalc").addEventListener("click", (e) => { e.preventDefault(); render(); });
   $("modeOne").addEventListener("click", () => setMode("one"));
   $("modeList").addEventListener("click", () => setMode("list"));
   document.addEventListener("click", (e) => {

@@ -1,6 +1,6 @@
 # Data quality report
 
-Health Cost Converter 2.0.0, built 2026-11-12 from World Development Indicators (last updated 2026-11-11), IMF World Economic Outlook (October 2026) and OECD PPPs.
+Health Cost Converter 2.1.0, built 2026-11-12 from World Development Indicators (last updated 2026-11-11), IMF World Economic Outlook (October 2026) and OECD PPPs.
 
 This file is written by `build/build.py` at every build. The build stops if a unit test fails.
 

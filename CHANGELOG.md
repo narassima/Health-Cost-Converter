@@ -2,6 +2,21 @@
 
 All notable changes to the Health Cost Converter. Versions follow [semantic versioning](https://semver.org/). The codes in brackets refer to the critical appraisal of version 1 (November 2026).
 
+## 2.1.0 — 2026-11-12
+
+### Changed
+- The calculator page now follows the layout of the CCEMG–EPPI Cost Converter:
+  - a green title bar and the same introductory text
+  - numbered Steps 1–6 with green label cells (cost, PPP source, original currency, target currency, original price year, target price year), with a Recalculate link
+  - other settings grouped under "Further options"
+- Results are shown in an EPPI-style table:
+  - one row for the original currency and one for the target currency
+  - columns for PPP values or exchange rates, ICF, GDPD (or CPI) values and IIF
+  - the final result, with the other two methods as sensitivity analyses
+  - footnotes explaining ICF and IIF
+- Projected values are now shown in red type, as IMF estimates are in the EPPI tool. The "How it works" and "Data sources" panels are merged into a single "Information for users" section below the tool.
+- Plain system fonts are used, and the dark theme has been removed. Results are unchanged.
+
 ## 2.0.0 — 2026-11-12
 
 ### Results change

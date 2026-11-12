@@ -4,7 +4,7 @@ A browser calculator that restates a cost from one country, currency and price y
 
 **Open the calculator:** https://narassima.github.io/Health-Cost-Converter/
 
-Version 2.0.0 (see [CHANGELOG.md](CHANGELOG.md)). Data: World Bank WDI (last updated 11 November 2026), IMF World Economic Outlook (October 2026), OECD PPPs.
+Version 2.1.0 (see [CHANGELOG.md](CHANGELOG.md)). Data: World Bank WDI (last updated 11 November 2026), IMF World Economic Outlook (October 2026), OECD PPPs.
 
 ## What it does
 
@@ -18,7 +18,7 @@ Version 2.0.0 (see [CHANGELOG.md](CHANGELOG.md)). Data: World Bank WDI (last upd
 - Converts **a list of costs** pasted from Excel. It reads decimal commas safely and flags any number that could be read either way. It matches common column headers and lets you change the column mapping, and it reads fiscal years (2015-16) in the way you choose. The export carries full precision, a rounded column, every warning and the tool version.
 - Writes a **methods-section paragraph** naming the method, measure, currency, data sources, tool version and data vintage. A **permalink** reopens the exact calculation.
 
-Every field has an **i** button. The **How to use** page walks through worked examples.
+The page is laid out like the CCEMG–EPPI Cost Converter: Steps 1–6, a Results table (PPP or exchange-rate values, ICF, GDPD values, IIF and the final result, with the other methods as sensitivity analyses), then further options and "Information for users". Projected values are shown in red type. Every field has an **i** button, and the **How to use** page walks through worked examples.
 
 ## Files
 
