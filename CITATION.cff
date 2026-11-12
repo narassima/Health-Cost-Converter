@@ -6,7 +6,7 @@ type: software
 authors:
   - family-names: "Narassima"
     affiliation: "Great Lakes Institute of Management"
-version: "2.1.1"
+version: "2.1.2"
 date-released: "2026-11-12"
 license: MIT
 url: "https://narassima.github.io/Health-Cost-Converter/"

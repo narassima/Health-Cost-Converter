@@ -2,6 +2,16 @@
 
 All notable changes to the Health Cost Converter. Versions follow [semantic versioning](https://semver.org/). The codes in brackets refer to the critical appraisal of version 1 (November 2026).
 
+## 2.1.2 — 2026-11-12
+
+### Changed
+- Colour scheme now follows IHEETS (iheets.co.in):
+  - Forest green (#26462C) with white text on the title bar, step labels and table headers. The title bar uses a gradient to #163020 with a thin gold (#F8C300) underline.
+  - A light leaf-green tint on the sensitivity rows and the final result, and leaf green (#6EA03F) on the slider.
+  - Green links and headings.
+- In "Information for users", Methods 1, 2 and 3 each have their own short paragraph, followed by a separate "Which to choose" paragraph.
+- Results are unchanged.
+
 ## 2.1.1 — 2026-11-12
 
 ### Changed
