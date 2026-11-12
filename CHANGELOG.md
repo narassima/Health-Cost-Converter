@@ -2,6 +2,11 @@
 
 All notable changes to the Health Cost Converter. Versions follow [semantic versioning](https://semver.org/). The codes in brackets refer to the critical appraisal of version 1 (November 2026).
 
+## 2.1.1 — 2026-11-12
+
+### Changed
+- Colour scheme: the EPPI green is replaced by LinkedIn blue (#0A66C2) on the title bar, step labels and table headers, with white text on blue. Sensitivity rows use a light blue tint. Links and headings now use the same blue family. Results are unchanged.
+
 ## 2.1.0 — 2026-11-12
 
 ### Changed

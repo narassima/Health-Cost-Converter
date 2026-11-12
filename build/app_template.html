@@ -1,18 +1,20 @@
 <title>Health Cost Converter</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/* Layout after the CCEMG–EPPI Cost Converter: a green title bar, numbered steps with green label cells,
-   a plain results table with a green header, footnotes, then "Information for users". Projected values in red type. */
+/* Layout after the CCEMG–EPPI Cost Converter, in LinkedIn blue: a blue title bar, numbered steps with blue label cells,
+   a plain results table with a blue header, footnotes, then "Information for users". Projected values in red type. */
 :root {
-  --green: #99ff99;
-  --green-soft: #d6ffd6;
+  --brand: #0a66c2;
+  --brand-dark: #004182;
+  --brand-soft: #e8f1fb;
+  --on-brand: #ffffff;
   --bg: #ffffff;
   --tint: #f5f5f5;
   --ink: #000000;
   --muted: #555555;
   --line: #c8c8c8;
-  --accent: #0645ad;
-  --head: #2f5496;
+  --accent: #0a66c2;
+  --head: #004182;
   --m1: #1d4f91;
   --m2: #9a4a0b;
   --m3: #5b2a86;
@@ -44,9 +46,10 @@ a { color: var(--accent); }
 
 /* Title bar */
 .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 20px;
-  background: var(--green); padding: 8px 10px; margin-bottom: 14px; }
+  background: var(--brand); color: var(--on-brand); padding: 10px 12px; margin-bottom: 14px; border-radius: 4px; }
 .pages { display: flex; flex-wrap: wrap; gap: 4px 16px; }
-.pages a { color: var(--ink); font-weight: 600; white-space: nowrap; }
+.pages a { color: var(--on-brand); font-weight: 600; white-space: nowrap; }
+.top :focus-visible { outline-color: var(--on-brand); }
 .pages a[aria-current="page"] { text-decoration: none; }
 .pages a.dl::before { content: "↓ "; }
 .page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0; }
@@ -58,13 +61,15 @@ form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .seg { display: inline-flex; justify-self: start; border: 1px solid var(--line); }
 .seg button { font: inherit; border: 0; background: #fff; color: var(--accent); padding: 2px 12px; cursor: pointer; text-decoration: underline; }
 .seg button + button { border-left: 1px solid var(--line); }
-.seg button[aria-selected="true"] { background: var(--green); color: var(--ink); text-decoration: none; font-weight: 600; }
+.seg button[aria-selected="true"] { background: var(--brand); color: var(--on-brand); text-decoration: none; font-weight: 600; }
 .steps { counter-reset: step; display: grid; gap: 3px; }
 .step { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 0 6px; align-items: center; }
 .step.num { counter-increment: step; }
 .step.num .s-lab > :first-child::before { content: counter(step) ". "; }
-.s-lab { background: var(--green); padding: 1px 4px; display: flex; align-items: center; gap: 6px; min-height: 24px; }
-.s-lab label, .s-lab span { flex: 1; color: var(--ink); }
+.s-lab { background: var(--brand); color: var(--on-brand); padding: 2px 6px; border-radius: 2px; display: flex; align-items: center; gap: 6px; min-height: 24px; }
+.s-lab label, .s-lab span { flex: 1; color: var(--on-brand); }
+.s-lab .info { border-color: var(--on-brand); color: var(--on-brand); background: transparent; }
+.s-lab .info:hover, .s-lab .info[aria-expanded="true"] { background: var(--on-brand); color: var(--brand); }
 .s-in { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
 .s-in label { color: var(--ink); }
 .step .info-text { grid-column: 1 / -1; margin: 2px 0 4px; }
@@ -77,7 +82,7 @@ input[type="text"], select, textarea {
 #cost { width: 12em; }
 select.wide { width: 22em; }
 textarea { width: 100%; font-family: var(--mono); font-size: 0.85rem; resize: vertical; white-space: pre; overflow-x: auto; }
-.share-row input[type="range"] { width: 14em; accent-color: #2a8a2a; margin: 0; }
+.share-row input[type="range"] { width: 14em; accent-color: var(--brand); margin: 0; }
 .share-row output { font-family: var(--mono); }
 .hint, .avail { font-size: 0.85rem; color: var(--muted); }
 .info {
@@ -102,11 +107,12 @@ textarea { width: 100%; font-family: var(--mono); font-size: 0.85rem; resize: ve
 #oneOut > .res-h { margin-bottom: -10px; }
 table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
 th, td { text-align: left; padding: 2px 6px; vertical-align: top; }
-th { font-weight: 400; background: var(--green); }
+th { font-weight: 400; background: var(--brand); color: var(--on-brand); }
 .res thead th { white-space: nowrap; }
-.res thead th small { display: block; font-size: 0.78rem; color: var(--muted); }
-.res tbody th[scope="row"], .res tr.final td:first-child { background: var(--green); }
-.res tr.sens td:first-child { background: var(--green-soft); }
+.res thead th small { display: block; font-size: 0.78rem; color: rgb(255 255 255 / 0.8); }
+.res tbody th[scope="row"], .res tr.final td:first-child { background: var(--brand); color: var(--on-brand); }
+.res tr.sens td:first-child { background: var(--brand-soft); }
+.res tr.final td:last-child { background: var(--brand-soft); }
 .res tbody td { border-bottom: 1px solid #eee; }
 .res th, .res td { vertical-align: middle; }
 .res .bar { color: var(--muted); }
